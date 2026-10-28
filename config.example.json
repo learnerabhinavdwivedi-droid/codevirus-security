@@ -1,0 +1,14 @@
+{
+  "assistantId": "your-vapi-assistant-id",
+  "phoneNumberId": "your-vapi-phone-number-id",
+  "phoneNumber": "+10000000000",
+  "phoneNumberProvider": "twilio",
+  "inboundAssistantAttached": true,
+  "vapiKey": "your-vapi-api-key",
+  "vapiPublicKey": "your-vapi-public-key",
+  "supabaseUrl": "https://your-supabase-project.supabase.co",
+  "webhookUrl": "https://your-domain.loca.lt/webhook",
+  "ngrokUrl": "https://your-domain.loca.lt",
+  "tunnelUrl": "https://your-domain.loca.lt"
+}
+

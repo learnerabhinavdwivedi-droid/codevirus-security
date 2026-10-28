@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<!--
+  CODEVIRUS SECURITY — Enterprise AI Voice Receptionist & Cyber-Ops Intake Platform
+  ════════════════════════════════════════════════════════════════════════════════
+  Codevirus Security Pvt. Ltd. & Codevirus Academy — Lucknow, UP, India
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codevirus Security — Lead &amp; Consultation Management</title>
+  <link rel="icon" type="image/png" href="/logo-navy.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════════════════════════
+       DESIGN BASE — ported verbatim from Dashboard.dc.html
+       ══════════════════════════════════════════════════════════ */
+    * { box-sizing:border-box }
+    html, body { margin:0; padding:0 }
+    body {
+      background:#F6F8FC;
+      font-family:'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      color:#0A1F44;
+    }
+    body::after {
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:9999;
+      opacity:.5;
+      mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.28'/%3E%3C/svg%3E");
+    }
+
+    @keyframes rise      { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes rowrise   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes dotpulse  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.82)} }
+    @keyframes ring      { 0%{transform:scale(.9);opacity:.7} 70%{transform:scale(1.9);opacity:0} 100%{opacity:0} }
+    @keyframes sheen     { 0%{transform:translateX(-160%) skewX(-18deg)} 60%,100%{transform:translateX(320%) skewX(-18deg)} }
+    @keyframes wave      { 0%,100%{transform:scaleY(.28)} 50%{transform:scaleY(1)} }
+    @keyframes flow      { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+    @keyframes shimmer   { 0%{background-position:-460px 0} 100%{background-position:460px 0} }
+    @keyframes drift1    { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,-30px) scale(1.15)} }
+    @keyframes drift2    { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-50px,40px) scale(1.2)} }
+    @keyframes drift3    { 0%,100%{transform:translate(0,0) scale(1.1)} 50%{transform:translate(40px,30px) scale(.9)} }
+    @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    button { font-family:inherit; }
+    button:disabled { opacity:.45; cursor:not-allowed; pointer-events:none; }
+    .hidden { display:none !important; }
+
+    /* ══════════════════════════════════════════════════════════
+       APP-ONLY ADDITIONS — not present in the design mockup
+       (operational necessities: server status, toasts)
+       ══════════════════════════════════════════════════════════ */
+    .server-banner {
+      background:#FFFBEB;
+      border-bottom:1px solid #FDE68A;
+      padding:9px 28px;
+      font-size:12.5px;
+      color:#92400E;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:500;
+    }
+
+    .toast-container {
+      position:fixed; bottom:24px; right:24px; z-index:9999;
+      display:flex; flex-direction:column; gap:10px; pointer-events:none;
+    }
+    .toast {
+      background:#fff; border:1px solid rgba(10,31,68,.07);
+      border-radius:14px;
+      padding:14px 16px; min-width:300px; max-width:380px;
+      box-shadow:0 4px 8px rgba(10,31,68,.06), 0 14px 36px rgba(10,31,68,.12);
+      display:flex; align-items:flex-start; gap:11px;
+      pointer-events:all;
+      animation:toastIn .24s ease both;
+      font-family:'Inter', sans-serif;
+    }
+    @keyframes toastIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(20px)} }
+    .toast-removing { animation:toastOut .24s ease forwards; }
+    .toast-success { border-left:3px solid #2E9C64; }
+    .toast-error   { border-left:3px solid #C0492F; }
+    .toast-info    { border-left:3px solid #C9A56A; }
+    .toast-icon    { font-size:16px; line-height:1; margin-top:2px; flex-shrink:0; }
+    .toast-body    { flex:1; }
+    .toast-title   { font-size:13px; font-weight:600; color:#0A1F44; margin-bottom:2px; letter-spacing:-.01em; }
+    .toast-msg     { font-size:12px; color:rgba(10,31,68,.5); line-height:1.45; }
+
+    .empty-state      { text-align:center; padding:44px 20px; color:rgba(10,31,68,.4); }
+    .empty-state-icon { font-size:24px; margin-bottom:10px; opacity:.55; }
+    .empty-state-text { font-size:13px; line-height:1.55; }
+  
+    .filter-tab {
+      cursor: pointer;
+      border: 1px solid rgba(10,31,68,.12);
+      background: #fff;
+      color: rgba(10,31,68,.6);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: Inter, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all .14s ease;
+    }
+    .filter-tab:hover { background: rgba(10,31,68,.04); color: #0A1F44; }
+    .filter-tab.active-tab {
+      background: #0A1F44;
+      border-color: #0A1F44;
+      color: #fff;
+      font-weight: 600;
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(10,31,68,.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(10,31,68,.25), 0 0 0 1px rgba(10,31,68,.06);
+      padding: 28px 30px;
+      transform: translateY(12px) scale(.98);
+      transition: transform .2s ease;
+    }
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(10,31,68,.15);
+      font-family: Inter, sans-serif;
+      font-size: 13.5px;
+      color: #0A1F44;
+      outline: none;
+      margin-top: 6px;
+      margin-bottom: 14px;
+      background: #FBFBFD;
+      box-sizing: border-box;
+    }
+    .modal-input:focus {
+      border-color: #2563EB;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ── Server warning banner (app-only, not in design) ─────── -->
+  <div id="serverBanner" class="server-banner hidden">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Cannot reach server.js — start it with <strong>node server.js</strong> then refresh. Supabase data will still load.
+  </div>
+
+  <div style="max-width:1200px;margin:0 auto;padding:40px 32px 60px">
+
+    <!-- ===================== HEADER ===================== -->
+    <header style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#0A1F44,#1E3A6E);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(10,31,68,.22),inset 0 1px 0 rgba(255,255,255,.16);flex:none;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(37,99,235,0.15)"/>
+              <path d="M12 8v4" stroke="#00C9A7"/>
+              <path d="M12 16h.01" stroke="#00C9A7" stroke-width="3"/>
+            </svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px;font-weight:800;letter-spacing:-.02em;color:#0A1F44">Codevirus</span>
+              <span style="width:5px;height:5px;border-radius:50%;background:#2563EB"></span>
+              <span style="font-size:20px;font-weight:600;letter-spacing:-.01em;color:#2563EB">Security</span>
+            </div>
+            <span style="font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(10,31,68,.45)">Lead &amp; Consultation Management</span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:22px">
+          <div style="display:flex;align-items:center;gap:9px;padding:8px 15px;border-radius:999px;background:rgba(30,140,90,.07);border:1px solid rgba(30,140,90,.16)">
+            <span style="position:relative;width:8px;height:8px;display:inline-flex;align-items:center;justify-content:center">
+              <span style="position:absolute;width:8px;height:8px;border-radius:50%;background:#2E9C64;animation:ring 2.4s ease-out infinite"></span>
+              <span style="width:8px;height:8px;border-radius:50%;background:#2E9C64;box-shadow:0 0 8px rgba(46,156,100,.7)"></span>
+            </span>
+            <span style="font-size:12.5px;font-weight:600;letter-spacing:.01em;color:#1F7A4D;white-space:nowrap">System Active</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <a href="/BookingCalendar.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:#fff;border:1px solid rgba(10,31,68,.1);color:#1E3A6E;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(10,31,68,.04);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Calendar Diary
+            </a>
+            <a href="/whatsapp.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:#fff;border:1px solid rgba(10,125,107,.2);color:#0a7d6b;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(10,31,68,.04);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              WhatsApp Leads
+            </a>
+          </div>
+          <div style="text-align:right;min-width:118px">
+            <div id="clockTime" style="font-size:22px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:#0A1F44">--:--</div>
+            <div id="clockDate" style="font-size:11.5px;font-weight:500;color:rgba(10,31,68,.42);margin-top:1px">-- --- --</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:1px;margin-top:22px;background:linear-gradient(90deg,transparent,rgba(201,165,106,.55) 20%,rgba(201,165,106,.55) 80%,transparent)"></div>
+    </header>
+
+    <!-- ===================== STAT CARDS ===================== -->
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:30px">
+
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.06s;background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:22px 22px 20px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 8px 22px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;will-change:transform">
+        <div style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#EAF0FB,#D8E4F7);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E3A6E" stroke-width="1.9" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M3.5 9h17M8 2.5v4M16 2.5v4"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:rgba(10,31,68,.4);margin-top:16px">Today's Consultations</div>
+        <div id="statTotal" style="font-size:44px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;margin-top:8px;color:#0A1F44">—</div>
+        <div id="statTotalSub" style="font-size:12px;font-weight:500;color:rgba(10,31,68,.4);margin-top:9px">Across today's schedule</div>
+      </div>
+
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.12s;background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:22px 22px 20px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 8px 22px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;will-change:transform">
+        <div style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#E4F3EA,#D0EBDB);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5 9.2 17.3 4 12.1"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:rgba(10,31,68,.4);margin-top:16px">Confirmed Sessions</div>
+        <div id="statConfirmed" style="font-size:44px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;margin-top:8px;color:#0A1F44">—</div>
+        <div id="statConfirmedSub" style="font-size:12px;font-weight:500;color:#1F7A4D;margin-top:9px">—</div>
+      </div>
+
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.18s;background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:22px 22px 20px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 8px 22px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;will-change:transform">
+        <div style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#F7EAE4,#F0D9CE);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B8593B" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.2"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:rgba(10,31,68,.4);margin-top:16px">No-Shows</div>
+        <div id="statNoShow" style="font-size:44px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;margin-top:8px;color:#0A1F44">—</div>
+        <div id="statNoShowSub" style="font-size:12px;font-weight:500;color:rgba(10,31,68,.4);margin-top:9px">—</div>
+      </div>
+
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.24s;background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:22px 22px 20px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 8px 22px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;will-change:transform">
+        <div style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#F5EFE2,#EFE3C9);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A9803F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.2A8.5 8.5 0 1 1 10.3 4a6.7 6.7 0 0 0 9.7 10.2z"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:rgba(10,31,68,.4);margin-top:16px">Dormant Leads</div>
+        <div id="statDormant" style="font-size:44px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1;margin-top:8px;color:#0A1F44">—</div>
+        <div id="statDormantSub" style="font-size:12px;font-weight:500;color:#A9803F;margin-top:9px">Ready for re-engagement</div>
+      </div>
+    </section>
+
+    <!-- ===================== AI RECEPTIONIST HERO ===================== -->
+    <section style="position:relative;margin-top:26px;animation:rise .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:.3s">
+      <div style="position:absolute;inset:6px -50px;z-index:0;pointer-events:none;-webkit-mask:radial-gradient(115% 82% at 50% 50%,#000 30%,transparent 72%);mask:radial-gradient(115% 82% at 50% 50%,#000 30%,transparent 72%)">
+        <div style="position:absolute;top:-30%;left:8%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(30,58,110,.34),transparent 68%);filter:blur(46px);animation:drift1 16s ease-in-out infinite"></div>
+        <div style="position:absolute;top:10%;right:6%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(201,165,106,.32),transparent 66%);filter:blur(50px);animation:drift2 19s ease-in-out infinite"></div>
+        <div style="position:absolute;bottom:-40%;left:38%;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(30,140,110,.16),transparent 66%);filter:blur(52px);animation:drift3 22s ease-in-out infinite"></div>
+      </div>
+
+      <div style="position:relative;z-index:1;border-radius:28px;padding:34px 38px;background:linear-gradient(135deg,rgba(255,255,255,.74),rgba(255,255,255,.5));backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.75);box-shadow:0 1px 2px rgba(10,31,68,.05),0 20px 60px rgba(10,31,68,.14),inset 0 1px 0 rgba(255,255,255,.6)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap">
+
+          <div style="display:flex;align-items:center;gap:22px;min-width:280px">
+            <div style="position:relative;width:76px;height:76px;flex:none">
+              <span style="position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(46,156,100,.5);animation:ring 2.6s ease-out infinite"></span>
+              <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(150deg,#2E4B82,#0A1F44);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(10,31,68,.35),inset 0 1px 0 rgba(255,255,255,.18)">
+                <span style="font-family:'Instrument Serif',serif;font-size:34px;color:#E9D6AC;line-height:1">S</span>
+              </div>
+              <span style="position:absolute;right:2px;bottom:2px;width:16px;height:16px;border-radius:50%;background:#2E9C64;border:3px solid #fff;box-shadow:0 0 8px rgba(46,156,100,.7)"></span>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#2563EB">AI Counselor &amp; Security Coordinator</div>
+              <div style="font-family:'Inter',sans-serif;font-size:38px;font-weight:700;line-height:1.02;letter-spacing:-.025em;color:#0A1F44;margin-top:2px">Sarah</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+                <span style="width:7px;height:7px;border-radius:50%;background:#2E9C64;animation:dotpulse 2s ease-in-out infinite"></span>
+                <span id="callStatus" style="font-size:13px;font-weight:500;color:#1F7A4D">Sarah is online</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:16px">
+            <!-- IDLE STATE -->
+            <div id="callIdleState" style="display:flex;flex-direction:column;align-items:flex-end;gap:16px">
+              <button id="callBtn" onclick="toggleCall()" onmouseenter="btnUp(event)" onmouseleave="btnDown(event)" onmousedown="btnPress(event)" onmouseup="btnUp(event)" style="position:relative;overflow:hidden;border:none;cursor:pointer;padding:16px 34px;border-radius:16px;background:linear-gradient(135deg,#1E3A6E,#0A1F44);color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:11px;box-shadow:0 10px 28px rgba(10,31,68,.3),0 0 0 1px rgba(201,165,106,.35),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .16s ease,box-shadow .16s ease">
+                <span style="position:absolute;top:0;left:0;width:34%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:sheen 3.6s ease-in-out infinite"></span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E9D6AC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5c1 0 1.6.3 1.9 1.2l.9 2.6c.2.6 0 1.2-.5 1.6l-1.3 1a13 13 0 0 0 5.1 5.1l1-1.3c.4-.5 1-.7 1.6-.5l2.6.9c.9.3 1.2.9 1.2 1.9v2.3c0 1.2-1 2.1-2.2 2A16.5 16.5 0 0 1 4.2 5.7 2 2 0 0 1 6.2 3.5z"/></svg>
+                <span id="callBtnText">Call Sarah</span>
+              </button>
+              <div style="display:flex;gap:9px">
+                <span style="font-size:12px;font-weight:500;padding:7px 13px;border-radius:999px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);color:#2563EB;white-space:nowrap">Books Demos &amp; Audits</span>
+   <span style="font-size:12px;font-weight:500;padding:7px 13px;border-radius:999px;background:rgba(10,31,68,.05);border:1px solid rgba(10,31,68,.07);color:#1E3A6E;white-space:nowrap">Course &amp; VAPT FAQs</span>
+   <span style="font-size:12px;font-weight:500;padding:7px 13px;border-radius:999px;background:rgba(0,201,167,.12);border:1px solid rgba(0,201,167,.28);color:#00897b;white-space:nowrap">English + Hinglish</span>
+              </div>
+            </div>
+
+            <!-- ACTIVE CALL STATE -->
+            <div id="callActiveState" class="hidden" style="flex-direction:column;align-items:flex-end;gap:16px">
+              <div style="display:flex;align-items:center;gap:20px;padding:14px 20px;border-radius:18px;background:linear-gradient(135deg,rgba(10,31,68,.94),rgba(30,58,110,.9));box-shadow:0 12px 30px rgba(10,31,68,.32),inset 0 1px 0 rgba(255,255,255,.12)">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="width:8px;height:8px;border-radius:50%;background:#5FD39A;box-shadow:0 0 8px rgba(95,211,154,.9);animation:dotpulse 1.3s ease-in-out infinite"></span>
+                  <span style="font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7)">Live Call</span>
+                </div>
+                <div id="callWaveform" style="display:flex;align-items:center;gap:2px;height:44px;width:150px"></div>
+                <div id="callTimer" style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:#E9D6AC;min-width:62px;text-align:center">00:00</div>
+                <button onclick="toggleCall()" onmouseenter="btnUp(event)" onmouseleave="btnDown(event)" style="border:none;cursor:pointer;width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#C0492F,#9A3320);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(154,51,32,.4);transition:transform .14s ease">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5c1 0 1.6.3 1.9 1.2l.9 2.6c.2.6 0 1.2-.5 1.6l-1.3 1a13 13 0 0 0 5.1 5.1l1-1.3c.4-.5 1-.7 1.6-.5l2.6.9c.9.3 1.2.9 1.2 1.9v2.3c0 1.2-1 2.1-2.2 2A16.5 16.5 0 0 1 4.2 5.7 2 2 0 0 1 6.2 3.5z" transform="rotate(135 12 12)"/></svg>
+                </button>
+              </div>
+              <div style="font-size:12px;font-weight:500;color:rgba(10,31,68,.5)">Sarah is speaking with a caller &middot; Codevirus Security</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LIVE CALL TRANSCRIPT CARD ===================== -->
+    <div id="transcriptSection" style="margin-top:18px;display:none;animation:rise .5s ease both;">
+      <div style="background:#0F172A;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px 24px;box-shadow:0 12px 36px rgba(10,31,68,.25);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#00C9A7;box-shadow:0 0 10px #00C9A7;animation:dotpulse 1.4s infinite;"></span>
+            <span style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#00C9A7;">Live Voice Speech-to-Text Transcript Feed</span>
+          </div>
+          <span style="font-size:11px;color:rgba(255,255,255,.5);font-family:monospace;">STT: Deepgram Nova-2 &middot; Vapi WebRTC</span>
+        </div>
+        <div id="transcriptFeed" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:8px;">
+          <div style="font-size:12.5px;color:rgba(255,255,255,.45);font-style:italic;">Listening to audio stream... Speak to Sarah and live transcription will appear here.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CYBER-OPS INTELLIGENCE & ACTIVITY STREAM ===================== -->
+    <section style="margin-top:24px;display:grid;grid-template-columns:1.8fr 1.2fr;gap:20px;animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.34s;">
+      
+      <!-- PROGRAM INTEREST & CONVERSION GAUGE -->
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:24px 26px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 8px 22px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:700;color:#0A1F44;">Lead Acquisition by Program</h3>
+            <span style="font-size:12px;color:rgba(10,31,68,.5);">Codevirus Academy &amp; Enterprise VAPT distribution</span>
+          </div>
+          <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(37,99,235,.09);color:#2563EB;">LIVE METRICS</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:5px;">
+              <span style="color:#0A1F44;">SOC Analyst Career Counseling (SIEM / Splunk)</span>
+              <span style="color:#2563EB;">45%</span>
+            </div>
+            <div style="height:7px;border-radius:4px;background:rgba(10,31,68,.06);overflow:hidden;">
+              <div style="width:45%;height:100%;background:linear-gradient(90deg,#2563EB,#60A5FA);border-radius:4px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:5px;">
+              <span style="color:#0A1F44;">Enterprise VAPT &amp; Network Penetration Audit</span>
+              <span style="color:#00C9A7;">30%</span>
+            </div>
+            <div style="height:7px;border-radius:4px;background:rgba(10,31,68,.06);overflow:hidden;">
+              <div style="width:30%;height:100%;background:linear-gradient(90deg,#00C9A7,#4ADE80);border-radius:4px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:5px;">
+              <span style="color:#0A1F44;">Ethical Hacking &amp; Bug Bounty (Burp Suite)</span>
+              <span style="color:#A9803F;">15%</span>
+            </div>
+            <div style="height:7px;border-radius:4px;background:rgba(10,31,68,.06);overflow:hidden;">
+              <div style="width:15%;height:100%;background:linear-gradient(90deg,#C9A56A,#F59E0B);border-radius:4px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:5px;">
+              <span style="color:#0A1F44;">Cloud Security (AWS) &amp; ISO 27001 Audits</span>
+              <span style="color:#7C3AED;">10%</span>
+            </div>
+            <div style="height:7px;border-radius:4px;background:rgba(10,31,68,.06);overflow:hidden;">
+              <div style="width:10%;height:100%;background:linear-gradient(90deg,#7C3AED,#A78BFA);border-radius:4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REAL-TIME ACTIVITY AUDIT FEED -->
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:24px 26px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 8px 22px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:700;color:#0A1F44;">Live Activity Stream</h3>
+            <span style="font-size:12px;color:rgba(10,31,68,.5);">Recent bookings, calls &amp; WhatsApp events</span>
+          </div>
+          <span style="width:7px;height:7px;border-radius:50%;background:#2E9C64;box-shadow:0 0 8px rgba(46,156,100,.8);animation:dotpulse 1.8s infinite;"></span>
+        </div>
+
+        <div id="activityFeedList" style="flex:1;overflow-y:auto;max-height:190px;display:flex;flex-direction:column;gap:10px;padding-right:4px;">
+          <!-- Dynamically populated from /api/activity -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== APPOINTMENTS TABLE ===================== -->
+    <section style="margin-top:26px;animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.36s">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h2 style="margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Today's Consultations</h2>
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(192,73,47,.09);border:1px solid rgba(192,73,47,.2)">
+            <span style="width:6px;height:6px;border-radius:50%;background:#C0492F;animation:livepulse 1.3s ease-in-out infinite"></span>
+            <span style="font-size:10.5px;font-weight:700;letter-spacing:.12em;color:#B8593B">LIVE</span>
+          </span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="position:relative;display:flex;align-items:center">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(10,31,68,.4)" stroke-width="2.2" style="position:absolute;left:10px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="searchInput" type="text" placeholder="Search candidate or phone…" oninput="filterConsultations()" style="padding:6px 12px 6px 30px;border-radius:8px;border:1px solid rgba(10,31,68,.14);background:#fff;font-family:Inter,sans-serif;font-size:12px;color:#0A1F44;outline:none;width:170px">
+          </div>
+
+          <div style="display:flex;align-items:center;gap:4px">
+            <button onclick="setStatusFilter('all')" class="filter-tab active-tab" id="tab-all">All</button>
+            <button onclick="setStatusFilter('confirmed')" class="filter-tab" id="tab-confirmed">Confirmed</button>
+            <button onclick="setStatusFilter('completed')" class="filter-tab" id="tab-completed">Completed</button>
+            <button onclick="setStatusFilter('no_show')" class="filter-tab" id="tab-no_show">No Show</button>
+          </div>
+
+          <button onclick="window.location.href='/api/export/consultations.csv'" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;background:#fff;color:#0A1F44;border:1px solid rgba(10,31,68,.15);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(10,31,68,.06);transition:all .14s ease;" title="Export consultations as CSV">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+
+          <button onclick="openBookingModal()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;background:#2563EB;color:#fff;border:none;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(37,99,235,.28);transition:all .14s ease;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            + Book Lead
+          </button>
+
+          <button onclick="openDialerModal()" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;background:#0F172A;color:#fff;border:none;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(15,23,42,.2);transition:all .14s ease;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00C9A7" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Test Phone Call
+          </button>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(10,31,68,.04),0 10px 30px rgba(10,31,68,.06)">
+        <div style="display:grid;grid-template-columns:2.2fr 1.3fr .9fr 1.1fr .9fr;gap:16px;padding:14px 26px;background:rgba(10,31,68,.02);border-bottom:1px solid rgba(10,31,68,.06)">
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Lead / Client</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Program / Security Audit</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Time</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Status</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4);text-align:right">Action</span>
+        </div>
+
+        <div id="appointmentsTbody">
+          <!-- Skeleton rows (verbatim from design) shown until loadAppointments() resolves -->
+          <div style="display:grid;grid-template-columns:2.2fr 1.3fr .9fr 1.1fr .9fr;gap:16px;padding:16px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04)"><div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:60%;height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:22px;border-radius:11px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div>
+          <div style="display:grid;grid-template-columns:2.2fr 1.3fr .9fr 1.1fr .9fr;gap:16px;padding:16px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04)"><div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:60%;height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:22px;border-radius:11px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div>
+          <div style="display:grid;grid-template-columns:2.2fr 1.3fr .9fr 1.1fr .9fr;gap:16px;padding:16px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04)"><div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:60%;height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:22px;border-radius:11px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== AUTOMATION FLOWS ===================== -->
+    <section style="display:flex;flex-direction:column;gap:20px;margin-top:26px">
+
+      <!-- NO-SHOW RECOVERY -->
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.42s;background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:28px 30px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 10px 30px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;will-change:transform">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap">
+          <div style="display:flex;align-items:flex-start;gap:15px;max-width:640px">
+            <div style="width:44px;height:44px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#EAF0FB,#D8E4F7);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#1E3A6E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.5 8.2A8.5 8.5 0 1 1 4 15"/><path d="M6.5 9.5c.8 0 1.3.2 1.5 1l.6 1.9c.1.5 0 1-.4 1.3l-.8.6a9 9 0 0 0 3.4 3.4l.6-.8c.3-.4.8-.5 1.3-.4l1.9.6c.7.2 1 .7 1 1.5v1.4c0 .9-.7 1.5-1.6 1.4A11.5 11.5 0 0 1 5.1 11.1 1.4 1.4 0 0 1 6.5 9.5z"/></svg>
+            </div>
+            <div>
+              <h3 style="margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">No-Show Recovery</h3>
+              <p style="margin:6px 0 0;font-size:13.5px;font-weight:500;line-height:1.5;color:rgba(10,31,68,.5)">When a student or enterprise client misses their scheduled demo or VAPT scoping call, Sarah automatically calls them back to reschedule — recovering high-value leads.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none">
+            <span id="noShowQueueLabel" style="font-size:11.5px;font-weight:500;color:rgba(10,31,68,.4);white-space:nowrap">— leads queued</span>
+            <button onclick="triggerRecoveryCall()" onmouseenter="btnUp(event)" onmouseleave="btnDown(event)" style="border:none;cursor:pointer;padding:9px 20px;border-radius:12px;background:linear-gradient(135deg,#1E3A6E,#0A1F44);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;box-shadow:0 6px 16px rgba(10,31,68,.24);transition:transform .14s ease">Trigger</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0;margin-top:24px">
+          <div style="flex:1;min-width:0;background:rgba(10,31,68,.025);border:1px solid rgba(10,31,68,.06);border-radius:15px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:30px;height:30px;flex:none;border-radius:9px;background:linear-gradient(150deg,#2E4B82,#0A1F44);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#E9D6AC;box-shadow:0 4px 10px rgba(10,31,68,.25)">1</span>
+              <span style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Detect no-show</span>
+            </div>
+            <p style="margin:11px 0 0;font-size:12px;font-weight:500;line-height:1.45;color:rgba(10,31,68,.5)">Sarah flags the missed slot the moment it lapses in the calendar.</p>
+          </div>
+          <div style="flex:0 0 40px;height:3px;border-radius:3px;background:linear-gradient(90deg,#1E3A6E,#C9A56A,#1E3A6E);background-size:200% 100%;animation:flow 3s linear infinite"></div>
+          <div style="flex:1;min-width:0;background:rgba(10,31,68,.025);border:1px solid rgba(10,31,68,.06);border-radius:15px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:30px;height:30px;flex:none;border-radius:9px;background:linear-gradient(150deg,#2E4B82,#0A1F44);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#E9D6AC;box-shadow:0 4px 10px rgba(10,31,68,.25)">2</span>
+              <span style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Personal callback</span>
+            </div>
+            <p style="margin:11px 0 0;font-size:12px;font-weight:500;line-height:1.45;color:rgba(10,31,68,.5)">She calls and engages the lead to find a convenient new time.</p>
+          </div>
+          <div style="flex:0 0 40px;height:3px;border-radius:3px;background:linear-gradient(90deg,#1E3A6E,#C9A56A,#1E3A6E);background-size:200% 100%;animation:flow 3s linear infinite"></div>
+          <div style="flex:1;min-width:0;background:rgba(201,165,106,.07);border:1px solid rgba(201,165,106,.24);border-radius:15px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:30px;height:30px;flex:none;border-radius:9px;background:linear-gradient(150deg,#D8B878,#C9A56A);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#3A2A0E;box-shadow:0 4px 10px rgba(201,165,106,.4)">3</span>
+              <span style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:#A9803F">Rebook the slot</span>
+            </div>
+            <p style="margin:11px 0 0;font-size:12px;font-weight:500;line-height:1.45;color:rgba(10,31,68,.5)">The recovered appointment lands back on the schedule automatically.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST-CONSULT FOLLOW-UP -->
+      <div onmousemove="tiltCard(event)" onmouseleave="untiltCard(event)" style="animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.48s;background:#fff;border:1px solid rgba(10,31,68,.05);border-radius:20px;padding:28px 30px;box-shadow:0 1px 2px rgba(10,31,68,.04),0 10px 30px rgba(10,31,68,.06);transition:transform .18s ease,box-shadow .18s ease;will-change:transform">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap">
+          <div style="display:flex;align-items:flex-start;gap:15px;max-width:640px">
+            <div style="width:44px;height:44px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#F5EFE2,#EFE3C9);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#A9803F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 5.6a5 5 0 0 0-7.1 0l-1.3 1.3-1.3-1.3a5 5 0 1 0-7.1 7.1l1.3 1.3L12 21l7.1-7.1 1.3-1.3a5 5 0 0 0 0-7z"/></svg>
+            </div>
+            <div>
+              <h3 style="margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Post-Consult Follow-Up</h3>
+              <p style="margin:6px 0 0;font-size:13.5px;font-weight:500;line-height:1.5;color:rgba(10,31,68,.5)">48 hours after a visit, Sarah calls to check in and re-open pending treatment decisions — turning one-time visits into ongoing care.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none">
+            <span style="font-size:11.5px;font-weight:500;color:rgba(10,31,68,.4);white-space:nowrap">Runs 48h post-visit</span>
+            <button onclick="triggerFollowUp()" onmouseenter="btnUp(event)" onmouseleave="btnDown(event)" style="border:none;cursor:pointer;padding:9px 20px;border-radius:12px;background:linear-gradient(135deg,#1E3A6E,#0A1F44);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;box-shadow:0 6px 16px rgba(10,31,68,.24);transition:transform .14s ease">Trigger</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0;margin-top:24px">
+          <div style="flex:1;min-width:0;background:rgba(10,31,68,.025);border:1px solid rgba(10,31,68,.06);border-radius:15px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:30px;height:30px;flex:none;border-radius:9px;background:linear-gradient(150deg,#2E4B82,#0A1F44);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#E9D6AC;box-shadow:0 4px 10px rgba(10,31,68,.25)">1</span>
+              <span style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Wellness check-in</span>
+            </div>
+            <p style="margin:11px 0 0;font-size:12px;font-weight:500;line-height:1.45;color:rgba(10,31,68,.5)">Sarah calls 48 hours after a consultation to check on syllabus questions or audit scope sign-off.</p>
+          </div>
+          <div style="flex:0 0 40px;height:3px;border-radius:3px;background:linear-gradient(90deg,#1E3A6E,#C9A56A,#1E3A6E);background-size:200% 100%;animation:flow 3s linear infinite"></div>
+          <div style="flex:1;min-width:0;background:rgba(10,31,68,.025);border:1px solid rgba(10,31,68,.06);border-radius:15px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:30px;height:30px;flex:none;border-radius:9px;background:linear-gradient(150deg,#2E4B82,#0A1F44);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#E9D6AC;box-shadow:0 4px 10px rgba(10,31,68,.25)">2</span>
+              <span style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Re-engage Inquiries</span>
+            </div>
+            <p style="margin:11px 0 0;font-size:12px;font-weight:500;line-height:1.45;color:rgba(10,31,68,.5)">Pending career tracks — SOC Analyst, CEH, VAPT scope — are proactively re-engaged with batch availability.</p>
+          </div>
+          <div style="flex:0 0 40px;height:3px;border-radius:3px;background:linear-gradient(90deg,#1E3A6E,#C9A56A,#1E3A6E);background-size:200% 100%;animation:flow 3s linear infinite"></div>
+          <div style="flex:1;min-width:0;background:rgba(201,165,106,.07);border:1px solid rgba(201,165,106,.24);border-radius:15px;padding:16px 18px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:30px;height:30px;flex:none;border-radius:9px;background:linear-gradient(150deg,#D8B878,#C9A56A);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#3A2A0E;box-shadow:0 4px 10px rgba(201,165,106,.4)">3</span>
+              <span style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:#A9803F">Invite a review</span>
+            </div>
+            <p style="margin:11px 0 0;font-size:12px;font-weight:500;line-height:1.45;color:rgba(10,31,68,.5)">Enrolled candidates and satisfied audit clients are engaged for 5-star reviews and testimonials.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DORMANT REACTIVATION ===================== -->
+    <section style="margin-top:26px;animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.54s">
+      <h2 style="margin:0 0 16px;font-size:18px;font-weight:700;letter-spacing:-.01em;color:#0A1F44">Dormant Leads Reactivation</h2>
+
+      <div style="background:#fff;border:1px solid rgba(10,31,68,.05);border-left:3px solid #C9A56A;border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(10,31,68,.04),0 10px 30px rgba(10,31,68,.06)">
+        <div style="display:grid;grid-template-columns:2fr 1.1fr 1.6fr 1fr 1.3fr;gap:16px;padding:14px 26px;background:rgba(10,31,68,.02);border-bottom:1px solid rgba(10,31,68,.06)">
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Lead / Client</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Last Visit</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Service History</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4)">Days Since</span>
+          <span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,31,68,.4);text-align:right">Status</span>
+        </div>
+
+        <div id="dormantTbody">
+          <!-- Skeleton rows shown until loadDormantLeads() resolves -->
+          <div style="display:grid;grid-template-columns:2fr 1.1fr 1.6fr 1fr 1.3fr;gap:16px;padding:18px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04)"><div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:56%;height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:44px;height:26px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:22px;border-radius:11px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div>
+          <div style="display:grid;grid-template-columns:2fr 1.1fr 1.6fr 1fr 1.3fr;gap:16px;padding:18px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04)"><div style="display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:56%;height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:12px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="width:44px;height:26px;border-radius:6px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span><span style="height:22px;border-radius:11px;background:linear-gradient(90deg,#EEF2F8 25%,#E2E8F2 37%,#EEF2F8 63%);background-size:600px 100%;animation:shimmer 1.4s linear infinite"></span></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer style="margin-top:44px;padding-top:24px;border-top:1px solid rgba(10,31,68,.06);display:flex;align-items:center;justify-content:center;gap:9px;animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:.6s">
+    <img src="/logo-navy.png" alt="" style="height:20px;width:auto;display:block">
+    <span style="font-size:12.5px;font-weight:500;color:rgba(10,31,68,.42);white-space:nowrap">Powered by <span style="font-weight:600;color:#2563EB">Codevirus Security</span></span>
+  </footer>
+
+  <!-- ── Toast container (app-only, not in design) ───────────── -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ── Application Script ──────────────────────────────────── -->
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    import Vapi             from 'https://esm.sh/@vapi-ai/web@latest';
+
+    // ── Config ────────────────────────────────────────
+    const SUPABASE_URL      = 'https://eqyuwufbzbgaxwxrapqv.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxeXV3dWZiemJnYXh3eHJhcHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MzkyNjUsImV4cCI6MjA5ODIxNTI2NX0.zv45ehqujNng2iv0eMErGXTS5h5BilKSa_uarTNzO-4';
+    const SERVER = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file'))
+      ? window.location.origin
+      : 'http://localhost:3000';
+
+    // ── State ─────────────────────────────────────────
+    let supabase, vapi;
+    let assistantId       = null;
+    let callActive        = false;
+    let callTimerInterval = null;
+    let callStartTime     = 0;
+    let appointments      = [];
+
+    // ── Boot ──────────────────────────────────────────
+    async function boot() {
+      startClock();
+      buildWaveform();
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Load data immediately (works without server)
+      await Promise.all([loadAppointments(), loadDormantLeads(), loadActivityFeed()]);
+      setInterval(loadAppointments, 3000);
+      setInterval(loadActivityFeed, 4000);
+
+      // Try to reach server for config + Vapi init
+      try {
+        const res  = await fetch(`${SERVER}/config`, { signal: AbortSignal.timeout(3000) });
+        const cfg  = await res.json();
+        if (!res.ok || !cfg.assistantId) throw new Error(cfg.error || 'No assistantId in config');
+        assistantId = cfg.assistantId;
+        initVapi(cfg.vapiKey || cfg.assistantId);
+        document.getElementById('serverBanner').classList.add('hidden');
+      } catch (err) {
+        console.warn('[boot] Server unreachable:', err.message);
+        document.getElementById('serverBanner').classList.remove('hidden');
+        document.getElementById('callBtn').disabled = true;
+      }
+
+      // Real-time subscription
+      try {
+        supabase.channel('appt-live')
+          .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'appointments' },
+            () => { loadAppointments(); loadActivityFeed(); }
+          )
+          .subscribe((status, err) => {
+            if (err) console.warn('[dashboard] Realtime notice:', err.message);
+          });
+      } catch (e) {
+        console.warn('[dashboard] Realtime subscription skipped:', e.message);
+      }
+    }
+
+    // ── Real-Time Activity Feed ───────────────────────
+    async function loadActivityFeed() {
+      try {
+        const res = await fetch('/api/activity');
+        if (!res.ok) return;
+        const items = await res.json();
+        const container = document.getElementById('activityFeedList');
+        if (!container || !items.length) return;
+        container.innerHTML = items.slice(0, 6).map(it => {
+          const toneColors = {
+            blue:  { bg: 'rgba(37,99,235,.07)', border: 'rgba(37,99,235,.18)', text: '#2563EB', icon: '📅' },
+            green: { bg: 'rgba(46,156,100,.08)', border: 'rgba(46,156,100,.18)', text: '#1F7A4D', icon: '✓' },
+            gold:  { bg: 'rgba(201,165,106,.09)', border: 'rgba(201,165,106,.22)', text: '#A9803F', icon: '💬' }
+          };
+          const t = toneColors[it.tone] || toneColors.blue;
+          return `
+            <div style="background:${t.bg};border:1px solid ${t.border};border-radius:12px;padding:9px 12px;display:flex;align-items:flex-start;gap:10px;">
+              <span style="font-size:13px;line-height:1;margin-top:2px;">${t.icon}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12.5px;font-weight:600;color:#0A1F44;">${esc(it.title)}</div>
+                <div style="font-size:11.5px;color:rgba(10,31,68,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(it.detail)}</div>
+              </div>
+              <span style="font-size:10px;font-weight:500;color:rgba(10,31,68,.4);white-space:nowrap;">${esc(it.time || 'now')}</span>
+            </div>`;
+        }).join('');
+      } catch {}
+    }
+
+    // ── Live Transcript Helper ────────────────────────
+    function appendTranscript(role, text) {
+      if (!text || !text.trim()) return;
+      const feed = document.getElementById('transcriptFeed');
+      if (!feed) return;
+      const isSarah = role === 'assistant' || role === 'sarah';
+      const bubble = document.createElement('div');
+      bubble.style.cssText = `
+        display:flex;gap:10px;align-items:flex-start;
+        background:${isSarah ? 'rgba(37,99,235,.14)' : 'rgba(255,255,255,.06)'};
+        border:1px solid ${isSarah ? 'rgba(37,99,235,.3)' : 'rgba(255,255,255,.12)'};
+        border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.45;
+      `;
+      bubble.innerHTML = `
+        <span style="font-weight:700;font-size:11px;letter-spacing:.08em;color:${isSarah ? '#60A5FA' : '#00C9A7'};flex:none;text-transform:uppercase;">
+          ${isSarah ? '🤖 Sarah' : '👤 You'}:
+        </span>
+        <span style="color:${isSarah ? '#E2E8F0' : '#F1F5F9'};flex:1;">${esc(text)}</span>
+      `;
+      feed.appendChild(bubble);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    // ── Clock (ported from design's tick()) ───────────
+    function startClock() {
+      const timeEl = document.getElementById('clockTime');
+      const dateEl = document.getElementById('clockDate');
+      const tick = () => {
+        const now = new Date();
+        timeEl.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // ── Design interaction helpers (ported verbatim from Component class) ──
+    window.tiltCard = function(e) {
+      const el = e.currentTarget, r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+      el.style.transform = `perspective(900px) rotateX(${(-py * 6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg) translateY(-5px)`;
+      el.style.boxShadow = '0 2px 4px rgba(10,31,68,.05),0 24px 50px rgba(10,31,68,.14)';
+    };
+    window.untiltCard = function(e) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; };
+    window.btnUp    = function(e) { e.currentTarget.style.transform = 'translateY(-2px)'; };
+    window.btnDown  = function(e) { e.currentTarget.style.transform = ''; };
+    window.btnPress = function(e) { e.currentTarget.style.transform = 'translateY(1px)'; };
+    window.rowIn    = function(e) { e.currentTarget.style.background = 'rgba(30,58,110,.035)'; };
+    window.rowOut   = function(e) { e.currentTarget.style.background = ''; };
+    window.ghostIn  = function(e) {
+      const b = e.currentTarget;
+      if (b.dataset.g === 'danger') { b.style.background = 'rgba(192,73,47,.09)'; b.style.borderColor = 'rgba(192,73,47,.4)'; }
+      else { b.style.background = 'rgba(169,128,63,.1)'; b.style.borderColor = 'rgba(169,128,63,.4)'; }
+    };
+    window.ghostOut = function(e) {
+      const b = e.currentTarget;
+      b.style.background = 'transparent';
+      b.style.borderColor = b.dataset.g === 'danger' ? 'rgba(192,73,47,.22)' : 'rgba(169,128,63,.22)';
+    };
+
+    // Row/pill/dot/action style builders — ported from Component's pill()/dot()/action(),
+    // generalized from the design's demo "kind" strings to a green/red/gold tone.
+    function pillStyle(tone) {
+      const base = 'display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;';
+      if (tone === 'green') return base + 'background:rgba(30,140,90,.09);border:1px solid rgba(30,140,90,.2);color:#1F7A4D';
+      if (tone === 'red')   return base + 'background:rgba(192,73,47,.09);border:1px solid rgba(192,73,47,.2);color:#B8593B';
+      return base + 'background:rgba(169,128,63,.1);border:1px solid rgba(169,128,63,.22);color:#A9803F';
+    }
+    function dotStyle(tone) {
+      const b = 'width:6px;height:6px;border-radius:50%;';
+      if (tone === 'green') return b + 'background:#2E9C64;animation:dotpulse 2s ease-in-out infinite';
+      if (tone === 'red')   return b + 'background:#C0492F;animation:livepulse 1.2s ease-in-out infinite';
+      return b + 'background:#C9A56A;animation:dotpulse 2s ease-in-out infinite';
+    }
+    function ghostActionStyle(tone) {
+      const base = 'cursor:pointer;white-space:nowrap;padding:7px 14px;border-radius:10px;font-family:Inter,sans-serif;font-size:12.5px;font-weight:600;background:transparent;transition:background .14s ease,border-color .14s ease;';
+      if (tone === 'gold') return base + 'border:1px solid rgba(169,128,63,.22);color:#A9803F';
+      return base + 'border:1px solid rgba(192,73,47,.22);color:#B8593B';
+    }
+    function rowStyle(i) {
+      return 'display:grid;grid-template-columns:2.2fr 1.3fr .9fr 1.1fr .9fr;gap:16px;padding:15px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04);transition:background .15s ease;animation:rowrise .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:' + (i * 0.07).toFixed(2) + 's';
+    }
+    function drowStyle(i) {
+      return 'display:grid;grid-template-columns:2fr 1.1fr 1.6fr 1fr 1.3fr;gap:16px;padding:16px 26px;align-items:center;border-bottom:1px solid rgba(10,31,68,.04);transition:background .15s ease;animation:rowrise .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:' + (i * 0.09).toFixed(2) + 's';
+    }
+
+    // Avatar helpers — ported verbatim from Component's renderVals() avatar cycle
+    const AVATAR_GRADIENTS = [
+      'linear-gradient(150deg,#2E4B82,#0A1F44)',
+      'linear-gradient(150deg,#3B5C94,#14294F)',
+      'linear-gradient(150deg,#294A85,#0C2350)'
+    ];
+    function avatarGradient(i) { return AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]; }
+    function initialsOf(name) {
+      return String(name || '').trim().split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    }
+
+    // Waveform bars — ported verbatim from Component's renderVals() bars formula (decorative only)
+    function buildWaveform() {
+      const el = document.getElementById('callWaveform');
+      let html = '';
+      for (let i = 0; i < 34; i++) {
+        const height    = (30 + Math.round(Math.abs(Math.sin(i * 0.7 + 0.5)) * 70)) + '%';
+        const animation = 'wave ' + (0.7 + (i % 6) * 0.11).toFixed(2) + 's ease-in-out ' + (i * 0.045).toFixed(2) + 's infinite';
+        html += `<span style="width:3px;border-radius:3px;align-self:center;transform-origin:center;background:linear-gradient(180deg,#E9D6AC,#5FD39A);height:${height};animation:${animation}"></span>`;
+      }
+      el.innerHTML = html;
+    }
+
+    // ── Vapi init ─────────────────────────────────────
+    function initVapi(vapiKey) {
+      vapi = new Vapi(vapiKey);
+
+      vapi.on('call-start', () => {
+        callActive    = true;
+        callStartTime = Date.now();
+        document.getElementById('callIdleState').classList.add('hidden');
+        document.getElementById('callActiveState').classList.remove('hidden');
+        document.getElementById('callActiveState').style.display = 'flex';
+        document.getElementById('callStatus').textContent = 'Live call in progress';
+        const tsSection = document.getElementById('transcriptSection');
+        if (tsSection) tsSection.style.display = 'block';
+        const tsFeed = document.getElementById('transcriptFeed');
+        if (tsFeed) {
+          tsFeed.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#00C9A7;font-weight:600;padding:4px 0;">
+              <span style="width:6px;height:6px;border-radius:50%;background:#00C9A7;animation:dotpulse 1.2s infinite;"></span>
+              Audio connection established. Sarah is listening...
+            </div>`;
+        }
+        callTimerInterval = setInterval(updateCallTimer, 1000);
+        updateCallTimer();
+      });
+
+      vapi.on('call-end', () => {
+        endCallUI();
+        loadAppointments();
+        loadActivityFeed();
+        const tsFeed = document.getElementById('transcriptFeed');
+        if (tsFeed) {
+          tsFeed.insertAdjacentHTML('beforeend', `
+            <div style="font-size:11.5px;color:rgba(255,255,255,.45);margin-top:6px;font-style:italic;">
+              Call session completed &middot; Details synced
+            </div>`);
+        }
+      });
+
+      vapi.on('message', (message) => {
+        if (message.type === 'transcript') {
+          appendTranscript(message.role, message.transcript);
+        }
+        // Show toast on booking — server webhook handles Supabase insert + Google Calendar
+        if (message.type === 'tool-calls') {
+          for (const tc of (message.toolCallList || [])) {
+            if (tc.function?.name === 'book_appointment') {
+              let args = {};
+              try { args = JSON.parse(tc.function.arguments || '{}'); } catch {}
+              handleBookAppointment(args);
+              loadActivityFeed();
+            }
+          }
+        }
+      });
+
+      vapi.on('error', (err) => {
+        console.error('[vapi error]', err);
+        // Normal call ends (Sarah says goodbye, user hangs up) fire an error event with
+        // ejection / "Meeting has ended". These are expected — suppress the toast.
+        const msg  = (err?.error?.message || err?.message || '').toLowerCase();
+        const type = (err?.error?.type    || err?.type    || '').toLowerCase();
+        const isNormalEnd = type.includes('ejection')
+          || msg.includes('meeting has ended')
+          || msg.includes('call ended')
+          || type.includes('call-ended');
+        if (!isNormalEnd) {
+          showToast('Call Error', err?.error?.message || err?.message || 'Vapi call error — check console', 'error');
+        }
+        if (callActive) endCallUI();
+      });
+    }
+
+    function endCallUI() {
+      callActive = false;
+      clearInterval(callTimerInterval);
+      document.getElementById('callActiveState').classList.add('hidden');
+      document.getElementById('callActiveState').style.display = '';
+      document.getElementById('callIdleState').classList.remove('hidden');
+      document.getElementById('callStatus').textContent = 'Sarah is online';
+      document.getElementById('callTimer').textContent = '00:00';
+    }
+
+    function updateCallTimer() {
+      const elapsed = Date.now() - callStartTime;
+      const m = Math.floor(elapsed / 60000);
+      const s = Math.floor((elapsed / 1000) % 60);
+      document.getElementById('callTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    // ── Call toggle ───────────────────────────────────
+    window.toggleCall = async function() {
+      if (!vapi || !assistantId) {
+        showToast('Not Ready', 'Server must be running. Start server.js and refresh.', 'error');
+        return;
+      }
+      if (callActive) {
+        vapi.stop();
+      } else {
+        try {
+          await vapi.start(assistantId);
+        } catch (err) {
+          console.error('[call start]', err);
+          showToast('Call Failed', 'Could not start call. Check Vapi key & assistant ID.', 'error');
+        }
+      }
+    };
+
+    // ── Handle book_appointment from Sarah ────────────
+    // Server webhook (ngrok → server.js) handles Supabase insert + Google Calendar.
+    // This client-side handler only shows the toast; it must NOT send vapi.send()
+    // or insert to Supabase, as that would race with the server and block calendar creation.
+    function handleBookAppointment(args) {
+      const { patient_name, service } = args;
+      if (!patient_name || !service) return;
+      showToast('Appointment Booked!', `${patient_name} — ${service}`, 'success');
+    }
+
+    // ── Load Appointments ─────────────────────────────
+    async function loadAppointments() {
+      let rows = null;
+      try {
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('*')
+          .order('created_at', { ascending: true });
+        if (!error && Array.isArray(data) && data.length > 0) rows = data;
+      } catch (err) {}
+
+      if (!rows) {
+        try {
+          const res = await fetch('/api/appointments');
+          if (res.ok) rows = await res.json();
+        } catch (err) {}
+      }
+
+      appointments = rows || [];
+      renderAppointmentsTable(appointments);
+      updateStats(appointments);
+    }
+
+    function toneForStatus(status) {
+      if (status === 'confirmed' || status === 'completed') return 'green';
+      if (status === 'no_show') return 'red';
+      return 'gold'; // follow_up_sent and anything else
+    }
+
+    function statusLabel(status) {
+      const labels = {
+        confirmed:      'Confirmed',
+        completed:      'Completed',
+        no_show:        'No Show',
+        follow_up_sent: 'Follow-Up Sent'
+      };
+      return labels[status] || status;
+    }
+
+    function renderAppointmentsTable(rows) {
+      const container = document.getElementById('appointmentsTbody');
+      if (!rows.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">No consultations yet today — Sarah will schedule sessions as calls come in</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = rows.map((row, i) => {
+        const tone = toneForStatus(row.status);
+        return `
+        <div style="${rowStyle(i)}" onmouseenter="rowIn(event)" onmouseleave="rowOut(event)">
+          <div style="display:flex;align-items:center;gap:13px">
+            <div style="width:40px;height:40px;flex:none;border-radius:50%;background:${avatarGradient(i)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;box-shadow:0 3px 8px rgba(10,31,68,.2)">${esc(initialsOf(row.candidate_name || row.patient_name))}</div>
+            <div style="min-width:0">
+              <div style="font-size:14px;font-weight:600;color:#0A1F44;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(row.candidate_name || row.patient_name)}</div>
+              <div style="font-size:12px;font-weight:500;color:rgba(10,31,68,.42);font-variant-numeric:tabular-nums">${esc(row.phone || '—')}</div>
+            </div>
+          </div>
+          <div style="align-self:center;font-size:13.5px;font-weight:500;color:#1E3A6E">${esc(row.service)}</div>
+          <div style="align-self:center;font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums;color:#0A1F44">${esc(row.appointment_time || '—')}</div>
+          <div style="align-self:center"><span style="${pillStyle(tone)}"><span style="${dotStyle(tone)}"></span>${statusLabel(row.status)}</span></div>
+          <div style="align-self:center;text-align:right">${actionsCell(row, tone)}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function actionsCell(row, tone) {
+      const name = esc(row.candidate_name || row.patient_name || 'Candidate');
+      const phone = esc(row.phone || '');
+      const cleanPhone = phone.replace(/[^\d]/g, '');
+      const waBtn = cleanPhone ? `<a href="https://wa.me/${cleanPhone}?text=Hi%20${encodeURIComponent(name)}%2C%20this%20is%20Codevirus%20Security%20regarding%20your%20consultation." target="_blank" style="text-decoration:none;font-size:11px;font-weight:600;padding:4px 8px;border-radius:7px;background:rgba(0,168,132,.1);color:#00a884;border:1px solid rgba(0,168,132,.25);display:inline-flex;align-items:center;gap:3px;" title="Chat on WhatsApp">💬 WA</a>` : '';
+      const icsBtn = `<a href="/api/appointments/${row.id}/calendar.ics" download style="text-decoration:none;font-size:11px;font-weight:600;padding:4px 8px;border-radius:7px;background:rgba(37,99,235,.08);color:#2563EB;border:1px solid rgba(37,99,235,.22);display:inline-flex;align-items:center;gap:3px;" title="Add to Calendar (.ics)">📅 .ics</a>`;
+      let statusBtn = '';
+      if (row.status === 'confirmed') {
+        statusBtn = `<button style="${ghostActionStyle('red')}" data-g="danger" onmouseenter="ghostIn(event)" onmouseleave="ghostOut(event)" onclick="markNoShow('${row.id}','${phone}','${name}')">No-Show</button>`;
+      } else if (row.status === 'completed') {
+        statusBtn = `<button style="${ghostActionStyle('gold')}" onmouseenter="ghostIn(event)" onmouseleave="ghostOut(event)" onclick="triggerRowFollowUp('${row.id}','${phone}','${name}')">Follow-Up</button>`;
+      } else if (row.status === 'follow_up_sent') {
+        statusBtn = `<span style="font-size:11.5px;color:rgba(10,31,68,.4);font-style:italic">Follow-up sent ✓</span>`;
+      } else if (row.status === 'no_show') {
+        statusBtn = `<span style="font-size:11.5px;color:rgba(10,31,68,.4);font-style:italic">Recovery sent ✓</span>`;
+      }
+      const delBtn = `<button onclick="deleteRow('${row.id}','${name}')" style="background:none;border:none;cursor:pointer;color:rgba(10,31,68,.3);font-size:13px;padding:3px;" title="Delete consultation">🗑️</button>`;
+
+      return `<div style="display:inline-flex;align-items:center;gap:5px;justify-content:flex-end;">${waBtn}${icsBtn}${statusBtn}${delBtn}</div>`;
+    }
+
+    window.triggerRowFollowUp = async function(id, phone, name) {
+      if (!phone) { showToast('Missing Phone', 'No phone number for ' + name, 'info'); return; }
+      try {
+        const res = await fetch(`${SERVER}/trigger-outbound`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, patient_name: name, call_type: 'follow_up' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Follow-Up Call Initiated', 'Calling ' + name + ' from Codevirus Security…', 'success');
+          try {
+            await fetch(`${SERVER}/api/appointments/${id}/status`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'follow_up_sent' })
+            });
+          } catch {}
+          try {
+            await supabase.from('appointments').update({ status: 'follow_up_sent' }).eq('id', id);
+          } catch {}
+          loadAppointments();
+        } else {
+          showToast('Call Failed', data.error || 'Outbound call failed', 'error');
+        }
+      } catch {
+        showToast('Server Unreachable', 'Start server.js to trigger outbound calls.', 'error');
+      }
+    };
+
+    
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    window.openBookingModal = function() {
+      document.getElementById('modalDate').value = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+      document.getElementById('bookingModal').classList.add('open');
+    };
+
+    window.openDialerModal = function() {
+      document.getElementById('dialerModal').classList.add('open');
+    };
+
+    window.closeModal = function(id) {
+      document.getElementById(id).classList.remove('open');
+    };
+
+    window.closeModalOnBackdrop = function(e, id) {
+      if (e.target.id === id) closeModal(id);
+    };
+
+    window.setStatusFilter = function(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active-tab'));
+      const activeBtn = document.getElementById('tab-' + filter);
+      if (activeBtn) activeBtn.classList.add('active-tab');
+      applyTableFilters();
+    };
+
+    window.filterConsultations = function() {
+      searchQuery = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      applyTableFilters();
+    };
+
+    function applyTableFilters() {
+      let filtered = appointments || [];
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(r => r.status === currentFilter);
+      }
+      if (searchQuery) {
+        filtered = filtered.filter(r =>
+          (r.candidate_name || r.patient_name || '').toLowerCase().includes(searchQuery) ||
+          (r.phone || '').includes(searchQuery) ||
+          (r.service || '').toLowerCase().includes(searchQuery)
+        );
+      }
+      renderAppointmentsTable(filtered);
+    }
+
+    window.submitManualBooking = async function() {
+      const name = document.getElementById('modalName').value.trim();
+      const phone = document.getElementById('modalPhone').value.trim();
+      const email = document.getElementById('modalEmail') ? document.getElementById('modalEmail').value.trim() : null;
+      const counselor = document.getElementById('modalCounselor') ? document.getElementById('modalCounselor').value : 'Ankit Rai (Senior Trainer)';
+      const batch_preference = document.getElementById('modalBatch') ? document.getElementById('modalBatch').value : 'Kapoorthala Offline Lab';
+      const service = document.getElementById('modalService').value;
+      const date = document.getElementById('modalDate').value;
+      const time = document.getElementById('modalTime').value;
+      const notes = document.getElementById('modalNotes').value.trim();
+
+      if (!name) { showToast('Missing Name', 'Please enter candidate/client name', 'error'); return; }
+
+      try {
+        const res = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patient_name: name,
+            candidate_name: name,
+            phone: phone || null,
+            email: email || null,
+            counselor,
+            batch_preference,
+            service,
+            appointment_date: date,
+            appointment_time: time,
+            notes: notes || null,
+            status: 'confirmed',
+            source: 'staff-dashboard'
+          })
+        });
+        const d = await res.json();
+        if (res.ok) {
+          showToast('Consultation Booked!', name + ' — ' + service, 'success');
+          closeModal('bookingModal');
+          document.getElementById('modalName').value = '';
+          if (document.getElementById('modalEmail')) document.getElementById('modalEmail').value = '';
+          document.getElementById('modalNotes').value = '';
+          await loadAppointments();
+        } else {
+          showToast('Error', d.error || 'Could not save booking', 'error');
+        }
+      } catch (err) {
+        showToast('Error', err.message, 'error');
+      }
+    };
+
+    window.submitTestCall = async function() {
+      const phone = document.getElementById('dialerPhone').value.trim();
+      const name  = document.getElementById('dialerName').value.trim() || 'Valued Candidate';
+      const type  = document.getElementById('dialerType').value;
+      const btn   = document.getElementById('btnDialNow');
+
+      if (!phone || phone.length < 8) {
+        showToast('Invalid Phone', 'Please enter a valid phone number with country code (e.g. +91...)', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Calling…';
+
+      try {
+        const res = await fetch('/trigger-outbound', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, patient_name: name, call_type: type })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Call Placed Successfully!', 'Sarah is calling ' + phone + ' right now. Answer your phone!', 'success');
+          closeModal('dialerModal');
+        } else {
+          showToast('Call Error', data.error || 'Failed to place outbound call', 'error');
+        }
+      } catch (err) {
+        showToast('Server Error', err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00C9A7" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Dial My Phone';
+      }
+    };
+
+    window.deleteRow = async function(id, name) {
+      if (!confirm('Remove consultation for ' + name + '?')) return;
+      try {
+        await fetch('/api/appointments/' + id, { method: 'DELETE' });
+        showToast('Removed', 'Consultation deleted', 'info');
+        await loadAppointments();
+      } catch (err) {
+        showToast('Error', err.message, 'error');
+      }
+    };
+
+
+    // ── Mark No-Show ──────────────────────────────────
+    window.markNoShow = async function(id, phone, patientName) {
+      // 1. Update server store
+      try {
+        await fetch(`${SERVER}/api/appointments/${id}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'no_show' })
+        });
+      } catch {}
+
+      // 2. Update Supabase
+      try {
+        await supabase.from('appointments').update({ status: 'no_show' }).eq('id', id);
+      } catch {}
+
+      // 3. Trigger outbound recovery call via server
+      try {
+        const res = await fetch(`${SERVER}/trigger-outbound`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ phone, patient_name: patientName, call_type: 'no_show' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Recovery Call Initiated', `Calling ${patientName} now…`, 'success');
+        } else {
+          showToast('Status Updated', `No-show recorded for ${patientName}.`, 'info');
+        }
+      } catch {
+        showToast('Status Updated', `No-show recorded for ${patientName}.`, 'info');
+      }
+
+      loadAppointments();
+    };
+
+    // ── Trigger Follow-Up ─────────────────────────────
+    window.triggerFollowUp = async function() {
+      const completed = appointments.filter(a => a.status === 'completed' && a.phone);
+      if (!completed.length) {
+        showToast('No Eligible Candidates', 'No completed consultations with phone numbers found.', 'info');
+        return;
+      }
+      const candidate = completed[completed.length - 1];
+      const candidateName = candidate.candidate_name || candidate.patient_name || 'Candidate';
+      try {
+        const res = await fetch(`${SERVER}/trigger-outbound`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ phone: candidate.phone, patient_name: candidateName, candidate_name: candidateName, call_type: 'follow_up' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Follow-Up Call Initiated', `Calling ${candidateName} to check in…`, 'success');
+          try {
+            await fetch(`${SERVER}/api/appointments/${candidate.id}/status`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'follow_up_sent' })
+            });
+          } catch {}
+          try {
+            await supabase.from('appointments').update({ status: 'follow_up_sent' }).eq('id', candidate.id);
+          } catch {}
+          loadAppointments();
+        } else {
+          showToast('Call Failed', data.error || 'Outbound call failed', 'error');
+        }
+      } catch {
+        showToast('Server Unreachable', 'Start server.js to trigger outbound calls.', 'error');
+      }
+    };
+
+    // ── Call Dormant Lead ──────────────────────────────
+    window.callDormantLead = async function(id, phone, name) {
+      if (!phone) { showToast('Missing Phone', 'No phone number for ' + name, 'info'); return; }
+      try {
+        const res = await fetch(`${SERVER}/trigger-outbound`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, patient_name: name, candidate_name: name, call_type: 'reactivation' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Reactivation Call Initiated', `Sarah is calling ${name} from Codevirus Security…`, 'success');
+          try {
+            await fetch(`${SERVER}/api/dormant/${id}/reactivate`, { method: 'POST' });
+          } catch {}
+          loadDormantLeads();
+        } else {
+          showToast('Call Note', data.error || 'Outbound call queued', 'info');
+        }
+      } catch {
+        showToast('Server Unreachable', 'Start server.js to trigger outbound calls.', 'error');
+      }
+    };
+
+    // ── Trigger Recovery Call ─────────────────────────
+    window.triggerRecoveryCall = async function() {
+      const noShows = appointments.filter(a => a.status === 'no_show' && a.phone);
+      if (!noShows.length) {
+        showToast('No No-Shows', 'No no-show appointments with phone numbers found.', 'info');
+        return;
+      }
+      const candidate = noShows[noShows.length - 1];
+      const candidateName = candidate.candidate_name || candidate.patient_name || 'Candidate';
+      try {
+        const res  = await fetch(`${SERVER}/trigger-outbound`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ phone: candidate.phone, patient_name: candidateName, candidate_name: candidateName, call_type: 'no_show' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Recovery Call Initiated', `Calling ${candidateName} to reschedule…`, 'success');
+        } else {
+          showToast('Call Failed', data.error || 'Outbound call failed', 'error');
+        }
+      } catch {
+        showToast('Server Unreachable', 'Start server.js to trigger outbound calls.', 'error');
+      }
+    };
+
+    // ── Count-up animation (visual only) ─────────────
+    function countUp(el, target, duration = 900) {
+      const start = parseInt(el.textContent, 10) || 0;
+      if (start === target) { el.textContent = target; return; }
+      const startTime = performance.now();
+      const step = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        el.textContent = Math.round(start + (target - start) * ease);
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    // ── Stats ─────────────────────────────────────────
+    function updateStats(rows) {
+      const total     = rows.length;
+      const confirmed = rows.filter(r => r.status === 'confirmed').length;
+      const noShows   = rows.filter(r => r.status === 'no_show').length;
+      const queued    = rows.filter(r => r.status === 'no_show' && r.phone).length;
+
+      countUp(document.getElementById('statTotal'),     total);
+      countUp(document.getElementById('statConfirmed'), confirmed);
+      countUp(document.getElementById('statNoShow'),    noShows);
+
+      document.getElementById('statConfirmedSub').textContent =
+        total ? `${Math.round((confirmed / total) * 100)}% confirmation rate` : 'No appointments yet';
+      document.getElementById('statNoShowSub').textContent =
+        noShows ? `${noShows} missed today` : 'Perfect attendance today';
+      document.getElementById('noShowQueueLabel').textContent =
+        `${queued} candidate${queued === 1 ? '' : 's'} queued`;
+    }
+
+    // ── Dormant Leads & Inquiries ─────────────────────
+    async function loadDormantLeads() {
+      let data = null;
+      try {
+        const { data: sbData, error } = await supabase
+          .from('dormant_patients')
+          .select('*')
+          .order('last_visit', { ascending: true });
+        if (!error && Array.isArray(sbData) && sbData.length > 0) data = sbData;
+      } catch (err) {}
+
+      if (!data) {
+        try {
+          const res = await fetch('/api/dormant');
+          if (res.ok) data = await res.json();
+        } catch (err) {}
+      }
+
+      const container = document.getElementById('dormantTbody');
+      if (!data?.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-text">No dormant leads found</div></div>`;
+        document.getElementById('statDormant').textContent = '0';
+        return;
+      }
+
+      countUp(document.getElementById('statDormant'), data.length);
+
+      container.innerHTML = data.map((row, i) => {
+        const lastVisit  = new Date(row.last_visit);
+        const daysSince  = Math.floor((Date.now() - lastVisit.getTime()) / 86400000);
+        const visitLabel = lastVisit.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        return `
+        <div style="${drowStyle(i)}" onmouseenter="rowIn(event)" onmouseleave="rowOut(event)">
+          <div style="display:flex;align-items:center;gap:13px">
+            <div style="width:40px;height:40px;flex:none;border-radius:50%;background:${avatarGradient(i)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;box-shadow:0 3px 8px rgba(10,31,68,.2)">${esc(initialsOf(row.name))}</div>
+            <div style="font-size:14px;font-weight:600;color:#0A1F44">${esc(row.name)}</div>
+          </div>
+          <div style="align-self:center;font-size:13.5px;font-weight:500;color:#1E3A6E">${visitLabel}</div>
+          <div style="align-self:center;font-size:13px;font-weight:500;color:rgba(10,31,68,.55)">${esc(row.service_history || '—')}</div>
+          <div style="align-self:center;display:flex;align-items:baseline;gap:4px"><span style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:#0A1F44">${daysSince}</span><span style="font-size:11px;font-weight:500;color:rgba(10,31,68,.4)">days</span></div>
+          <div style="align-self:center;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:${row.reactivation_status === 'reactivated' ? 'rgba(46,156,100,.1)' : 'rgba(169,128,63,.1)'};border:1px solid ${row.reactivation_status === 'reactivated' ? 'rgba(46,156,100,.25)' : 'rgba(169,128,63,.22)'};font-size:11.5px;font-weight:600;color:${row.reactivation_status === 'reactivated' ? '#1F7A4D' : '#A9803F'};white-space:nowrap">
+              <span style="width:6px;height:6px;border-radius:50%;background:${row.reactivation_status === 'reactivated' ? '#2E9C64' : '#C9A56A'};"></span>
+              ${row.reactivation_status === 'reactivated' ? 'Reactivated' : 'Pending'}
+            </span>
+            <button onclick="callDormantLead('${row.id}','${esc(row.phone || '')}','${esc(row.name)}')" style="cursor:pointer;border:1px solid rgba(37,99,235,.28);background:rgba(37,99,235,.07);color:#2563EB;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;transition:all .15s ease;" title="Trigger AI reactivation call">📞 Call</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Toast ─────────────────────────────────────────
+    function showToast(title, msg, type = 'info') {
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.innerHTML = `
+        <div class="toast-icon">${icons[type]}</div>
+        <div class="toast-body">
+          <div class="toast-title">${esc(title)}</div>
+          <div class="toast-msg">${esc(msg)}</div>
+        </div>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.classList.add('toast-removing');
+        setTimeout(() => el.remove(), 240);
+      }, 4200);
+    }
+
+    // ── Util ──────────────────────────────────────────
+    function esc(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Start ─────────────────────────────────────────
+    boot().catch(console.error);
+  </script>
+
+
+  <!-- MODAL: MANUAL BOOKING -->
+  <div id="bookingModal" class="modal-overlay" onclick="closeModalOnBackdrop(event, 'bookingModal')">
+    <div class="modal-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;font-size:18px;font-weight:700;color:#0A1F44;">Book Consultation / Lead</h3>
+        <button onclick="closeModal('bookingModal')" style="background:none;border:none;cursor:pointer;font-size:20px;color:rgba(10,31,68,.4);line-height:1;">&times;</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Candidate / Client Name</label>
+          <input id="modalName" type="text" placeholder="e.g. Rahul Verma" class="modal-input" required>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Phone Number</label>
+          <input id="modalPhone" type="tel" placeholder="+91 98765 43210" class="modal-input" value="+91">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Email Address</label>
+          <input id="modalEmail" type="email" placeholder="rahul@example.com" class="modal-input">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Assigned Counselor</label>
+          <select id="modalCounselor" class="modal-input" style="height:42px;">
+            <option value="Ankit Rai (Senior Trainer)">Ankit Rai (Senior Trainer)</option>
+            <option value="Pawan Yadav (VAPT Lead)">Pawan Yadav (VAPT Lead)</option>
+            <option value="Abhishek Pal (SOC Lead)">Abhishek Pal (SOC Lead)</option>
+            <option value="Admissions Desk">Admissions Desk</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Program / Service</label>
+          <select id="modalService" class="modal-input" style="height:42px;">
+            <option value="SOC Analyst Career Counseling">SOC Analyst Career Counseling (SIEM/Splunk)</option>
+            <option value="VAPT & Network Security Audit">VAPT & Network Security Audit</option>
+            <option value="Ethical Hacking & Bug Bounty">Ethical Hacking & Bug Bounty (Burp Suite)</option>
+            <option value="Cloud Security & AWS Diploma">Cloud Security & AWS Diploma</option>
+            <option value="ISO 27001 Readiness Consultation">ISO 27001 Readiness Consultation</option>
+            <option value="B.Tech Summer Internship Demo">B.Tech Summer Internship Demo</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Batch Mode</label>
+          <select id="modalBatch" class="modal-input" style="height:42px;">
+            <option value="Kapoorthala Offline Lab">Kapoorthala Offline Lab</option>
+            <option value="Live Online Interactive">Live Online Interactive</option>
+            <option value="Weekend Fast-Track">Weekend Fast-Track</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Date</label>
+          <input id="modalDate" type="date" class="modal-input">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Time</label>
+          <select id="modalTime" class="modal-input" style="height:42px;">
+            <option value="10:00 AM">10:00 AM</option>
+            <option value="11:30 AM" selected>11:30 AM</option>
+            <option value="02:00 PM">02:00 PM</option>
+            <option value="03:30 PM">03:30 PM</option>
+            <option value="05:00 PM">05:00 PM</option>
+            <option value="06:30 PM">06:30 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Notes / Scope</label>
+      <input id="modalNotes" type="text" placeholder="e.g. Kapoorthala offline demo, placement assistance" class="modal-input">
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+        <button onclick="closeModal('bookingModal')" style="padding:10px 18px;border-radius:10px;background:#F1F4F9;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:rgba(10,31,68,.7);cursor:pointer;">Cancel</button>
+        <button onclick="submitManualBooking()" style="padding:10px 22px;border-radius:10px;background:#2563EB;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.3);">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIVE TEST CALL DIALER -->
+  <div id="dialerModal" class="modal-overlay" onclick="closeModalOnBackdrop(event, 'dialerModal')">
+    <div class="modal-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:#0F172A;display:flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00C9A7" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0;font-size:17px;font-weight:700;color:#0A1F44;">Live AI Test Dialer</h3>
+            <span style="font-size:12px;color:rgba(10,31,68,.5);">Sarah will dial your mobile phone live via Vapi</span>
+          </div>
+        </div>
+        <button onclick="closeModal('dialerModal')" style="background:none;border:none;cursor:pointer;font-size:20px;color:rgba(10,31,68,.4);line-height:1;">&times;</button>
+      </div>
+
+      <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Candidate / Your Name</label>
+      <input id="dialerName" type="text" placeholder="e.g. Ansh" value="Test Candidate" class="modal-input">
+
+      <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Phone Number (E.164 with Country Code)</label>
+      <input id="dialerPhone" type="tel" placeholder="+919667172535" value="+919667172535" class="modal-input" required>
+
+      <label style="font-size:12px;font-weight:600;color:rgba(10,31,68,.6);text-transform:uppercase;">Call Scenario / Script</label>
+      <select id="dialerType" class="modal-input" style="height:42px;">
+        <option value="follow_up" selected>Post-Consultation Follow-Up (Curriculum & Next Steps)</option>
+        <option value="no_show">Missed Session Recovery (Reschedule Consultation)</option>
+        <option value="reactivation">Dormant Lead Re-engagement (New Batch Openings)</option>
+      </select>
+
+      <div style="background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.15);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:11.5px;font-weight:600;color:#2563EB;margin-bottom:3px;">PRO-TIP:</div>
+        <div style="font-size:12px;color:rgba(10,31,68,.65);line-height:1.4;">Make sure your phone number includes <strong>+91</strong> (or your country code). Once you click dial, your phone will ring within 5 seconds.</div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="closeModal('dialerModal')" style="padding:10px 18px;border-radius:10px;background:#F1F4F9;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:rgba(10,31,68,.7);cursor:pointer;">Cancel</button>
+        <button id="btnDialNow" onclick="submitTestCall()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:10px;background:#0F172A;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(15,23,42,.3);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00C9A7" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Dial My Phone
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
