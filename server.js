@@ -327,16 +327,6 @@ function requireAdminAuth(req, res, next) {
 // 6. Whitelisted Public Static File Server (Prevents .env, source code, and data leaks)
 const FRONTEND_DIST = path.join(__dirname, 'frontend', 'dist');
 
-const ALLOWED_STATIC_FILES = new Set([
-  'dashboard.html',
-  'BookingCalendar.html',
-  'whatsapp.html',
-  'logo-navy.png',
-  'chat-wallpaper.png',
-  'wa-icon.svg',
-  'manifest.json'
-]);
-
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
 
@@ -351,15 +341,10 @@ app.use((req, res, next) => {
     }
   }
 
-  // 2. Serve static assets from frontend/dist if present
+  // 2. Serve static assets from frontend/dist (logo, wallpaper, manifest, etc.)
   const distFile = path.join(FRONTEND_DIST, cleanPath);
   if (fs.existsSync(distFile) && fs.statSync(distFile).isFile()) {
     return res.sendFile(distFile);
-  }
-
-  // 3. Serve root whitelisted files (legacy HTMLs, logos, icons)
-  if (ALLOWED_STATIC_FILES.has(cleanPath)) {
-    return res.sendFile(path.join(__dirname, cleanPath));
   }
 
   // Explicitly block any access to private files, dotfiles, source scripts, or database stores
@@ -375,13 +360,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Legacy HTML routes cleanly redirect to the modern React tabs
+app.get('/dashboard.html', (_req, res) => res.redirect('/'));
+app.get('/BookingCalendar.html', (_req, res) => res.redirect('/calendar'));
+app.get('/whatsapp.html', (_req, res) => res.redirect('/whatsapp'));
+
 // React Single Page Application Routes
 app.get(['/', '/dashboard', '/calendar', '/whatsapp'], (_req, res) => {
   const reactIndex = path.join(FRONTEND_DIST, 'index.html');
   if (fs.existsSync(reactIndex)) {
     return res.sendFile(reactIndex);
   }
-  return res.redirect('/dashboard.html');
+  return res.status(500).send('React frontend bundle missing. Run "npm run build".');
 });
 
 app.get('/health', (_req, res) => {
@@ -1275,10 +1265,9 @@ function startServer() {
     console.log(`║  Codevirus Security — AI Calling & Lead Server       ║`);
     console.log(`╠══════════════════════════════════════════════════════╣`);
     console.log(`║  Listening on  http://localhost:${PORT}                 ║`);
-    console.log(`║  React App:    http://localhost:${PORT}/                        ║`);
-    console.log(`║  Legacy HTML:  http://localhost:${PORT}/dashboard.html          ║`);
-    console.log(`║  Booking Diary: http://localhost:${PORT}/BookingCalendar.html   ║`);
-    console.log(`║  WhatsApp App: http://localhost:${PORT}/whatsapp.html          ║`);
+    console.log(`║  React Dashboard: http://localhost:${PORT}/                   ║`);
+    console.log(`║  React Calendar:  http://localhost:${PORT}/calendar           ║`);
+    console.log(`║  React WhatsApp:  http://localhost:${PORT}/whatsapp           ║`);
     console.log(`╠══════════════════════════════════════════════════════╣`);
     if (config.assistantId) {
       console.log(`║  ✓ Assistant ID loaded from config.json              ║`);

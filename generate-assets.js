@@ -224,8 +224,8 @@ const logoData = generateLogo();
 const wallpaperData = generateWallpaper();
 
 const targets = [
-  path.join(__dirname),
-  path.join(__dirname, 'frontend', 'public')
+  path.join(__dirname, 'frontend', 'public'),
+  path.join(__dirname, 'frontend', 'dist')
 ];
 
 targets.forEach(dir => {

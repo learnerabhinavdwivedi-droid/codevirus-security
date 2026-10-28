@@ -155,11 +155,10 @@ async function main() {
   setTimeout(() => openBrowser(appUrl), 1000);
 
   console.log('══════════════════════════════════════════════════════════════');
-  console.log('  🟢 ALL SYSTEMS RUNNING');
-  console.log('  • Modern React App:     http://localhost:' + PORT + '/');
-  console.log('  • Operations Dashboard: http://localhost:' + PORT + '/dashboard.html');
-  console.log('  • Calendar Diary:       http://localhost:' + PORT + '/BookingCalendar.html');
-  console.log('  • WhatsApp Demo:        http://localhost:' + PORT + '/whatsapp.html');
+  console.log('  🟢 ALL SYSTEMS RUNNING (REACT FRONTEND)');
+  console.log('  • Operations Dashboard: http://localhost:' + PORT + '/');
+  console.log('  • Calendar Diary:       http://localhost:' + PORT + '/calendar');
+  console.log('  • WhatsApp Console:     http://localhost:' + PORT + '/whatsapp');
   console.log('  • Press Ctrl+C in this window to stop all services');
   console.log('══════════════════════════════════════════════════════════════\n');
 }
