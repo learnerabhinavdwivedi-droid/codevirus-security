@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Send, Mic, Paperclip, Smile, MoreVertical, Search, Check,
-  CheckCheck, Phone, Video, Shield, User, Sparkles
+  CheckCheck, Phone, Video, Shield, User, Sparkles, CheckCircle2
 } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -20,22 +20,91 @@ const QUICK_PROMPTS = [
   'Do you offer 100% placement assistance in Lucknow?'
 ];
 
+// Audio Notification Chime (Web Audio API)
+function playMessageChime(isIncoming = false) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    const f = isIncoming ? 880 : 587.33;
+    osc.frequency.setValueAtTime(f, ctx.currentTime);
+    if (isIncoming) {
+      osc.frequency.exponentialRampToValueAtTime(1318.51, ctx.currentTime + 0.12);
+    }
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.16);
+  } catch {}
+}
+
 export default function WhatsAppConsole() {
   const { showToast } = useToast();
   const [selectedContact, setSelectedContact] = useState(TEAM_CONTACTS[0]);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'sarah',
-      text: 'Namaste! Welcome to Codevirus Security & Academy Lucknow. I am Sarah, your AI advisor. How may I assist you today with our cybersecurity training or security audits?',
-      time: '10:00 AM',
-      mine: false,
-      status: 'read'
-    }
-  ]);
+  const [threads, setThreads] = useState({
+    sarah: [
+      {
+        id: 1,
+        sender: 'sarah',
+        text: 'Namaste! Welcome to Codevirus Security & Academy Lucknow. I am Sarah, your AI advisor. How may I assist you today with our cybersecurity training or security audits?',
+        time: '10:00 AM',
+        mine: false,
+        status: 'read'
+      }
+    ],
+    ankit: [
+      {
+        id: 2,
+        sender: 'ankit',
+        text: 'Hello, Ankit Rai here. For enterprise VAPT or specialized SOC training, feel free to drop your requirements.',
+        time: 'Yesterday',
+        mine: false,
+        status: 'read'
+      }
+    ],
+    pawan: [
+      {
+        id: 3,
+        sender: 'pawan',
+        text: 'Hi! Burp Suite labs and bug bounty practice ranges are open this week at Kapoorthala.',
+        time: 'Sunday',
+        mine: false,
+        status: 'read'
+      }
+    ],
+    abhishek: [
+      {
+        id: 4,
+        sender: 'abhishek',
+        text: 'SIEM and Splunk live alerts lab session starts at 2:00 PM on Saturday.',
+        time: 'Friday',
+        mine: false,
+        status: 'read'
+      }
+    ],
+    admissions: [
+      {
+        id: 5,
+        sender: 'admissions',
+        text: 'Admissions desk at Kapoorthala is open Monday to Saturday 10:00 AM to 7:00 PM. Demo slots available!',
+        time: 'Thursday',
+        mine: false,
+        status: 'read'
+      }
+    ]
+  });
+
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [searchFilter, setSearchFilter] = useState('');
   const messagesEndRef = useRef(null);
+
+  const currentMessages = threads[selectedContact.id] || [];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,7 +112,7 @@ export default function WhatsAppConsole() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping]);
+  }, [currentMessages, isTyping]);
 
   // Poll server for new WhatsApp messages
   useEffect(() => {
@@ -53,13 +122,13 @@ export default function WhatsAppConsole() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            // Merge unique messages if needed
+            // Live background sync
           }
         }
       } catch {}
     };
 
-    const interval = setInterval(fetchMessages, 5000);
+    const interval = setInterval(fetchMessages, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -82,21 +151,37 @@ export default function WhatsAppConsole() {
       status: 'sent'
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    // Play outgoing pop sound
+    playMessageChime(false);
+
+    setThreads((prev) => ({
+      ...prev,
+      [selectedContact.id]: [...(prev[selectedContact.id] || []), userMsg]
+    }));
     setInputValue('');
 
     // Update tick states
     setTimeout(() => {
-      setMessages((prev) => prev.map((m) => (m.id === userMsg.id ? { ...m, status: 'delivered' } : m)));
-    }, 400);
+      setThreads((prev) => ({
+        ...prev,
+        [selectedContact.id]: prev[selectedContact.id].map((m) =>
+          m.id === userMsg.id ? { ...m, status: 'delivered' } : m
+        )
+      }));
+    }, 350);
 
     setTimeout(() => {
-      setMessages((prev) => prev.map((m) => (m.id === userMsg.id ? { ...m, status: 'read' } : m)));
-    }, 800);
+      setThreads((prev) => ({
+        ...prev,
+        [selectedContact.id]: prev[selectedContact.id].map((m) =>
+          m.id === userMsg.id ? { ...m, status: 'read' } : m
+        )
+      }));
+    }, 700);
 
-    // If talking to Sarah, call /api/chat-reply
+    // If talking to Sarah AI Receptionist, call /api/chat-reply
     if (selectedContact.id === 'sarah') {
-      setTimeout(() => setIsTyping(true), 600);
+      setTimeout(() => setIsTyping(true), 500);
 
       try {
         const res = await fetch('/api/chat-reply', {
@@ -105,7 +190,7 @@ export default function WhatsAppConsole() {
           body: JSON.stringify({
             message: text,
             chat_id: 'wa-demo-client',
-            history: messages.map((m) => ({ mine: m.mine, text: m.text }))
+            history: currentMessages.map((m) => ({ mine: m.mine, text: m.text }))
           })
         });
 
@@ -115,53 +200,70 @@ export default function WhatsAppConsole() {
 
         setTimeout(() => {
           setIsTyping(false);
-          setMessages((prev) => [
+          playMessageChime(true); // Incoming chime
+          setThreads((prev) => ({
             ...prev,
-            {
-              id: Date.now() + 1,
-              sender: 'sarah',
-              text: replyText,
-              time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
-              mine: false,
-              status: 'read'
-            }
-          ]);
-        }, 1200);
+            sarah: [
+              ...prev.sarah,
+              {
+                id: Date.now() + 1,
+                sender: 'sarah',
+                text: replyText,
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                mine: false,
+                status: 'read'
+              }
+            ]
+          }));
+        }, 1100);
       } catch (err) {
         setTimeout(() => {
           setIsTyping(false);
-          setMessages((prev) => [
+          playMessageChime(true);
+          setThreads((prev) => ({
             ...prev,
+            sarah: [
+              ...prev.sarah,
+              {
+                id: Date.now() + 1,
+                sender: 'sarah',
+                text: 'Thanks for contacting Codevirus Security! You can visit our Kapoorthala center or call us directly at +91 96487 77706. Would you like us to schedule a counseling call?',
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                mine: false,
+                status: 'read'
+              }
+            ]
+          }));
+        }, 900);
+      }
+    } else {
+      // Mock Colleague Team responses
+      setTimeout(() => setIsTyping(true), 700);
+      setTimeout(() => {
+        setIsTyping(false);
+        playMessageChime(true);
+        setThreads((prev) => ({
+          ...prev,
+          [selectedContact.id]: [
+            ...(prev[selectedContact.id] || []),
             {
               id: Date.now() + 1,
-              sender: 'sarah',
-              text: 'Thanks for contacting Codevirus Security! You can visit our Kapoorthala center or call us directly. Would you like us to schedule a counseling call?',
+              sender: selectedContact.id,
+              text: `Acknowledged! I will coordinate with the team regarding your inquiry about ${selectedContact.role}.`,
               time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
               mine: false,
               status: 'read'
             }
-          ]);
-        }, 1000);
-      }
-    } else {
-      // Mock colleague response
-      setTimeout(() => setIsTyping(true), 800);
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            sender: selectedContact.id,
-            text: `Hi! Received your message regarding ${selectedContact.role}. I will look into this shortly.`,
-            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
-            mine: false,
-            status: 'read'
-          }
-        ]);
-      }, 1800);
+          ]
+        }));
+      }, 1500);
     }
   };
+
+  const filteredContacts = TEAM_CONTACTS.filter((c) =>
+    c.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+    c.role.toLowerCase().includes(searchFilter.toLowerCase())
+  );
 
   return (
     <div
@@ -235,6 +337,8 @@ export default function WhatsAppConsole() {
             <input
               type="text"
               placeholder="Search or start new chat"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -249,8 +353,11 @@ export default function WhatsAppConsole() {
 
         {/* Contacts List */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
-          {TEAM_CONTACTS.map((c) => {
+          {filteredContacts.map((c) => {
             const isSelected = selectedContact.id === c.id;
+            const contactMsgs = threads[c.id] || [];
+            const lastMsg = contactMsgs[contactMsgs.length - 1];
+
             return (
               <div
                 key={c.id}
@@ -288,10 +395,10 @@ export default function WhatsAppConsole() {
                     <div style={{ fontSize: 14.5, fontWeight: 600, color: '#e9edef', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       {c.name}
                     </div>
-                    <span style={{ fontSize: 11, color: '#8696a0' }}>Now</span>
+                    <span style={{ fontSize: 11, color: '#8696a0' }}>{lastMsg ? lastMsg.time : 'Now'}</span>
                   </div>
                   <div style={{ fontSize: 12.5, color: '#8696a0', marginTop: 2, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {c.role}
+                    {lastMsg ? lastMsg.text : c.role}
                   </div>
                 </div>
               </div>
@@ -341,53 +448,55 @@ export default function WhatsAppConsole() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, color: '#aebac1' }}>
-            <Phone size={18} style={{ cursor: 'pointer' }} />
-            <Video size={20} style={{ cursor: 'pointer' }} />
+            <Phone size={18} style={{ cursor: 'pointer' }} title="Call Contact" />
+            <Video size={20} style={{ cursor: 'pointer' }} title="Video Call" />
             <MoreVertical size={19} style={{ cursor: 'pointer' }} />
           </div>
         </div>
 
-        {/* Quick Suggestion Chips */}
-        <div
-          style={{
-            padding: '8px 16px',
-            background: 'rgba(32, 44, 51, 0.9)',
-            borderBottom: '1px solid rgba(134,150,160,0.1)',
-            display: 'flex',
-            gap: 8,
-            overflowX: 'auto',
-            zIndex: 5
-          }}
-        >
-          {QUICK_PROMPTS.map((prompt, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSendMessage(prompt)}
-              style={{
-                background: '#111b21',
-                border: '1px solid rgba(0,168,132,0.4)',
-                color: '#e9edef',
-                borderRadius: 16,
-                padding: '6px 12px',
-                fontSize: 11.5,
-                fontWeight: 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#005c4b';
-                e.currentTarget.style.borderColor = '#00a884';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#111b21';
-                e.currentTarget.style.borderColor = 'rgba(0,168,132,0.4)';
-              }}
-            >
-              💬 {prompt}
-            </button>
-          ))}
-        </div>
+        {/* Quick Suggestion Chips (Available on Sarah AI thread) */}
+        {selectedContact.id === 'sarah' && (
+          <div
+            style={{
+              padding: '8px 16px',
+              background: 'rgba(32, 44, 51, 0.95)',
+              borderBottom: '1px solid rgba(134,150,160,0.1)',
+              display: 'flex',
+              gap: 8,
+              overflowX: 'auto',
+              zIndex: 5
+            }}
+          >
+            {QUICK_PROMPTS.map((prompt, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSendMessage(prompt)}
+                style={{
+                  background: '#111b21',
+                  border: '1px solid rgba(0,168,132,0.4)',
+                  color: '#e9edef',
+                  borderRadius: 16,
+                  padding: '6px 12px',
+                  fontSize: 11.5,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#005c4b';
+                  e.currentTarget.style.borderColor = '#00a884';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#111b21';
+                  e.currentTarget.style.borderColor = 'rgba(0,168,132,0.4)';
+                }}
+              >
+                💬 {prompt}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Messages Feed */}
         <div
@@ -423,7 +532,7 @@ export default function WhatsAppConsole() {
             </span>
           </div>
 
-          {messages.map((m) => {
+          {currentMessages.map((m) => {
             return (
               <div
                 key={m.id}
@@ -487,7 +596,7 @@ export default function WhatsAppConsole() {
                 }}
               >
                 <span className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#00a884' }} />
-                <span style={{ fontSize: 12, color: '#8696a0' }}>Sarah is typing…</span>
+                <span style={{ fontSize: 12, color: '#8696a0' }}>{selectedContact.name} is typing…</span>
               </div>
             </div>
           )}
@@ -522,7 +631,7 @@ export default function WhatsAppConsole() {
           >
             <input
               type="text"
-              placeholder="Type a message to Sarah or your team…"
+              placeholder={`Message ${selectedContact.name}…`}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
@@ -565,4 +674,3 @@ export default function WhatsAppConsole() {
     </div>
   );
 }
-

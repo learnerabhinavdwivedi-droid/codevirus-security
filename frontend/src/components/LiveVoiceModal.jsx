@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Vapi from '@vapi-ai/web';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, Shield, X, Sparkles } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, Shield, X, Sparkles, Radio } from 'lucide-react';
 import { useToast } from './Toast';
 
 export default function LiveVoiceModal({ isOpen, onClose, config }) {
@@ -11,34 +11,32 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
   const [duration, setDuration] = useState(0);
   const [assistantSpeaking, setAssistantSpeaking] = useState(false);
   const [activeTranscript, setActiveTranscript] = useState('');
+  const [voiceEngine, setVoiceEngine] = useState('vapi'); // 'vapi' | 'browser'
 
   const vapiRef = useRef(null);
   const timerRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const synthRef = useRef(window.speechSynthesis || null);
 
-  // Initialize Vapi instance
+  // Initialize Vapi instance if public key exists
   useEffect(() => {
-    if (!config?.vapiPublicKey) return;
+    if (!config?.vapiPublicKey) {
+      setVoiceEngine('browser');
+      return;
+    }
+
     try {
       const vapiInstance = new Vapi(config.vapiPublicKey);
       vapiRef.current = vapiInstance;
 
       vapiInstance.on('call-start', () => {
         setCallStatus('active');
-        showToast('Call Connected', 'You are now speaking with Sarah (AI Receptionist)', 'success');
-        timerRef.current = setInterval(() => {
-          setDuration((prev) => prev + 1);
-        }, 1000);
+        showToast('WebRTC Connected', 'Connected to Sarah via Vapi Voice Stream', 'success');
+        startTimer();
       });
 
       vapiInstance.on('call-end', () => {
-        setCallStatus('ended');
-        if (timerRef.current) clearInterval(timerRef.current);
-        showToast('Call Ended', 'Live AI call session completed', 'info');
-        setTimeout(() => {
-          setCallStatus('idle');
-          setDuration(0);
-          onClose();
-        }, 1500);
+        handleCallFinished();
       });
 
       vapiInstance.on('speech-start', () => {
@@ -60,78 +58,172 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
       });
 
       vapiInstance.on('error', (err) => {
-        console.error('[Vapi WebRTC Error]', err);
-        setCallStatus('idle');
-        if (timerRef.current) clearInterval(timerRef.current);
-        showToast('Call Failed', err?.message || 'Could not connect WebRTC voice call. Check API keys.', 'error');
+        console.warn('[Vapi WebRTC Warning]', err?.message);
+        // Seamless fallback to browser voice simulation mode
+        if (callStatus === 'connecting' || callStatus === 'active') {
+          showToast('Switching Engine', 'Connecting via Interactive Browser Voice Mode…', 'info');
+          startBrowserVoiceMode();
+        }
       });
 
       return () => {
-        try {
-          vapiInstance.stop();
-        } catch {}
+        try { vapiInstance.stop(); } catch {}
       };
     } catch (err) {
-      console.error('[Vapi Init Error]', err);
+      console.warn('[Vapi Init Error]', err);
+      setVoiceEngine('browser');
     }
-  }, [config?.vapiPublicKey, showToast, onClose]);
+  }, [config?.vapiPublicKey, showToast]);
 
-  // Clean timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-  const startLiveCall = async () => {
-    if (!vapiRef.current) {
-      showToast('Configuration Missing', 'Vapi public key not loaded yet', 'error');
-      return;
-    }
-    const assistantId = config?.assistantId;
-    if (!assistantId) {
-      showToast('Missing Assistant ID', 'No active Vapi assistant configured', 'error');
-      return;
-    }
-
-    try {
-      setCallStatus('connecting');
-      setDuration(0);
-      setActiveTranscript('');
-      await vapiRef.current.start(assistantId);
-    } catch (err) {
-      console.error('[Start Call]', err);
-      setCallStatus('idle');
-      showToast('Connection Error', err?.message || 'Could not initiate audio call', 'error');
-    }
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setDuration((prev) => prev + 1);
+    }, 1000);
   };
 
-  const endLiveCall = () => {
-    try {
-      if (vapiRef.current) {
-        vapiRef.current.stop();
-      }
-    } catch (err) {
-      console.error('[End Call]', err);
-    }
+  const handleCallFinished = () => {
     setCallStatus('ended');
     if (timerRef.current) clearInterval(timerRef.current);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+    }
+    if (synthRef.current) {
+      synthRef.current.cancel();
+    }
+    showToast('Call Completed', 'Voice session finished', 'info');
     setTimeout(() => {
       setCallStatus('idle');
       setDuration(0);
       onClose();
-    }, 800);
+    }, 1200);
+  };
+
+  // Browser Voice Engine (Web Speech API Fallback)
+  const startBrowserVoiceMode = () => {
+    setVoiceEngine('browser');
+    setCallStatus('active');
+    startTimer();
+
+    // Sarah speaks initial welcome
+    speakResponse("Namaste! I am Sarah from Codevirus Security Lucknow. How can I help you with our courses or security audits?");
+
+    // Setup speech recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = 'en-IN'; // Indian English / Hindi mix
+
+      recognition.onresult = async (event) => {
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult.isFinal) {
+          const text = lastResult[0].transcript.trim();
+          if (text) {
+            setActiveTranscript(text);
+            setAssistantSpeaking(false);
+            try {
+              const res = await fetch('/api/chat-reply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, chat_id: 'browser-voice-session' })
+              });
+              const data = await res.json();
+              const reply = data.reply || "Thank you! I will note that and connect you with our admissions counselor.";
+              speakResponse(reply);
+            } catch {
+              speakResponse("Our Kapoorthala center is open Monday to Saturday. Would you like to attend a free counseling demo session?");
+            }
+          }
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.warn('[Speech Recognition Notice]', e.error);
+      };
+
+      recognition.onend = () => {
+        if (callStatus === 'active') {
+          try { recognition.start(); } catch {}
+        }
+      };
+
+      try {
+        recognition.start();
+        recognitionRef.current = recognition;
+      } catch {}
+    }
+  };
+
+  const speakResponse = (text) => {
+    if (!synthRef.current) return;
+    synthRef.current.cancel();
+
+    setAssistantSpeaking(true);
+    setVolumeLevel(0.65);
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.05;
+
+    // Pick Indian English or female voice if available
+    const voices = synthRef.current.getVoices();
+    const preferredVoice = voices.find((v) =>
+      v.lang.includes('IN') || v.name.toLowerCase().includes('india') || v.name.toLowerCase().includes('female')
+    );
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.onend = () => {
+      setAssistantSpeaking(false);
+      setVolumeLevel(0.1);
+    };
+
+    utterance.onerror = () => {
+      setAssistantSpeaking(false);
+      setVolumeLevel(0);
+    };
+
+    synthRef.current.speak(utterance);
+  };
+
+  const startLiveCall = async () => {
+    setCallStatus('connecting');
+    setDuration(0);
+    setActiveTranscript('');
+
+    if (vapiRef.current && config?.assistantId && config?.vapiPublicKey) {
+      try {
+        setVoiceEngine('vapi');
+        await vapiRef.current.start(config.assistantId);
+      } catch (err) {
+        console.warn('[Vapi start failed, using browser voice fallback]', err?.message);
+        startBrowserVoiceMode();
+      }
+    } else {
+      startBrowserVoiceMode();
+    }
+  };
+
+  const endLiveCall = () => {
+    if (vapiRef.current && voiceEngine === 'vapi') {
+      try { vapiRef.current.stop(); } catch {}
+    }
+    handleCallFinished();
   };
 
   const toggleMute = () => {
-    try {
-      if (vapiRef.current) {
-        const nextMute = !isMuted;
-        vapiRef.current.setMuted(nextMute);
-        setIsMuted(nextMute);
+    const nextMute = !isMuted;
+    setIsMuted(nextMute);
+    if (vapiRef.current && voiceEngine === 'vapi') {
+      try { vapiRef.current.setMuted(nextMute); } catch {}
+    }
+    if (recognitionRef.current) {
+      if (nextMute) {
+        try { recognitionRef.current.stop(); } catch {}
+      } else {
+        try { recognitionRef.current.start(); } catch {}
       }
-    } catch (err) {
-      console.error('[Mute Toggle]', err);
     }
   };
 
@@ -187,7 +279,7 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
           <X size={18} />
         </button>
 
-        {/* Header */}
+        {/* Header Badge */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div
             style={{
@@ -201,9 +293,9 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
               marginBottom: 16
             }}
           >
-            <Sparkles size={14} color="#00C9A7" />
+            <Radio size={14} color="#00C9A7" />
             <span style={{ fontSize: 12, fontWeight: 600, color: '#00C9A7', letterSpacing: '0.05em' }}>
-              WEB-RTC LIVE AI AGENT
+              {voiceEngine === 'vapi' ? 'VAPI AI WEBRTC AGENT' : 'INTERACTIVE BROWSER VOICE AGENT'}
             </span>
           </div>
 
@@ -211,11 +303,11 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
             Codevirus AI Voice Assistant
           </h3>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
-            Speak directly with Sarah (Hindi / Hinglish / English supported)
+            Speak directly with Sarah (Hindi, Hinglish &amp; English supported)
           </p>
         </div>
 
-        {/* Central Audio Visualizer Circle */}
+        {/* Central Visualizer */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 30 }}>
           <div
             style={{
@@ -265,17 +357,17 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
           </div>
         </div>
 
-        {/* Status & Speech Indicators */}
+        {/* Status Text & Dynamic Transcripts */}
         <div style={{ textAlign: 'center', marginBottom: 26, minHeight: 48 }}>
           {callStatus === 'idle' && (
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>
-              Ready to start. Click the button below to connect your microphone.
+            <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.7)' }}>
+              Click below to start talking. Your microphone will connect instantly.
             </div>
           )}
           {callStatus === 'connecting' && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#38BDF8' }}>
               <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#38BDF8' }} />
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Connecting to Sarah via WebRTC…</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>Connecting live voice stream…</span>
             </div>
           )}
           {callStatus === 'active' && (
@@ -290,12 +382,12 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
                 <div style={{
                   marginTop: 10,
                   fontSize: 12,
-                  color: 'rgba(255,255,255,0.8)',
-                  background: 'rgba(255,255,255,0.06)',
+                  color: 'rgba(255,255,255,0.85)',
+                  background: 'rgba(255,255,255,0.08)',
                   padding: '6px 12px',
                   borderRadius: 8,
                   fontStyle: 'italic',
-                  maxHeight: 40,
+                  maxHeight: 45,
                   overflow: 'hidden'
                 }}>
                   "{activeTranscript}"
@@ -305,7 +397,7 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
           )}
           {callStatus === 'ended' && (
             <div style={{ fontSize: 14, color: '#94A3B8' }}>
-              Call completed. Closing session…
+              Call session completed.
             </div>
           )}
         </div>
@@ -340,7 +432,6 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
             <>
               <button
                 onClick={toggleMute}
-                disabled={callStatus !== 'active'}
                 style={{
                   width: 52,
                   height: 52,
@@ -353,7 +444,7 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
                   justifyContent: 'center',
                   cursor: 'pointer'
                 }}
-                title={isMuted ? 'Unmute' : 'Mute'}
+                title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
               >
                 {isMuted ? <MicOff size={22} /> : <Mic size={22} />}
               </button>
@@ -387,4 +478,3 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
     </div>
   );
 }
-

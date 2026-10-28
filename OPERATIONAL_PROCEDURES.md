@@ -291,3 +291,4 @@ node scenario-test-suite.js
 | `React frontend returns 500 missing bundle` | `frontend/dist` was cleaned or not compiled | Run `npm run build` from workspace root. Bundle generates in < 1 second. |
 | `Localtunnel disconnects or changes URL` | Free tunnel ephemeral nature | Run `node update-tunnel.js` to re-establish and re-sync Vapi assistant. For production, deploy behind static domain via `nginx.conf`. |
 | `Vapi call drops immediately on answer` | Invalid Assistant ID or private key | Verify `ASSISTANT_ID` and `VAPI_PRIVATE_KEY` in [`.env`](file:///c:/voice%20code%20virus/.env), then run `node setup.js`. |
+

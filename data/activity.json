@@ -1,5 +1,86 @@
 [
   {
+    "id": "act-1793177186363",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:46:26.363Z"
+  },
+  {
+    "id": "act-1793177185669",
+    "type": "call_transferred",
+    "title": "Call Transferred to Counselor",
+    "detail": "Enterprise Client transferred to +919648777706 — Reason: urgent_vapt_scoping",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:46:25.669Z"
+  },
+  {
+    "id": "act-1793177171564",
+    "type": "whatsapp_confirmed",
+    "title": "WhatsApp Confirmation Sent",
+    "detail": "+919648777706 — Booking confirmed for 2026-11-10 (SOC Analyst Demo Session)",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:46:11.564Z"
+  },
+  {
+    "id": "act-1793177171547",
+    "type": "lead_booked",
+    "title": "Consultation Scheduled",
+    "detail": "Idempotency Test Candidate — SOC Analyst Demo Session (12:00 PM)",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:46:11.547Z"
+  },
+  {
+    "id": "act-1793177111918",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:45:11.918Z"
+  },
+  {
+    "id": "act-1793177111176",
+    "type": "call_transferred",
+    "title": "Call Transferred to Counselor",
+    "detail": "Enterprise Client transferred to +919648777706 — Reason: urgent_vapt_scoping",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:45:11.176Z"
+  },
+  {
+    "id": "act-1793177073355",
+    "type": "call_completed",
+    "title": "Call Session Completed",
+    "detail": "+919667172535 — Candidate interested in offline SOC Analyst batch at Kapoorthala ...",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:44:33.355Z"
+  },
+  {
+    "id": "act-1793177073339",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:44:33.339Z"
+  },
+  {
+    "id": "act-1793177065149",
+    "type": "lead_booked",
+    "title": "Consultation Scheduled",
+    "detail": "Security Test Candidate — SOC Analyst Career Counseling (11:00 AM)",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:44:25.149Z"
+  },
+  {
     "id": "act-1793176311373",
     "type": "call_completed",
     "title": "Call Session Completed",
@@ -97,86 +178,5 @@
     "time": "Just now",
     "tone": "green",
     "created_at": "2026-10-28T08:16:30.806Z"
-  },
-  {
-    "id": "act-1793175390791",
-    "type": "chat_reply",
-    "title": "Sarah WhatsApp AI Reply",
-    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
-    "time": "Just now",
-    "tone": "green",
-    "created_at": "2026-10-28T08:16:30.791Z"
-  },
-  {
-    "id": "act-1793175382311",
-    "type": "lead_booked",
-    "title": "Consultation Scheduled",
-    "detail": "Security Test Candidate — SOC Analyst Career Counseling (11:00 AM)",
-    "time": "Just now",
-    "tone": "blue",
-    "created_at": "2026-10-28T08:16:22.311Z"
-  },
-  {
-    "id": "act-1793118286920",
-    "type": "call_completed",
-    "title": "Call Session Completed",
-    "detail": "+919667172535 — Candidate interested in offline SOC Analyst batch at Kapoorthala ...",
-    "time": "Just now",
-    "tone": "green",
-    "created_at": "2026-10-27T16:24:46.920Z"
-  },
-  {
-    "id": "act-1793118286897",
-    "type": "chat_reply",
-    "title": "Sarah WhatsApp AI Reply",
-    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
-    "time": "Just now",
-    "tone": "green",
-    "created_at": "2026-10-27T16:24:46.897Z"
-  },
-  {
-    "id": "act-1793118278791",
-    "type": "lead_booked",
-    "title": "Consultation Scheduled",
-    "detail": "Security Test Candidate — SOC Analyst Career Counseling (11:00 AM)",
-    "time": "Just now",
-    "tone": "blue",
-    "created_at": "2026-10-27T16:24:38.791Z"
-  },
-  {
-    "id": "act-1793118166214",
-    "type": "call_completed",
-    "title": "Call Session Completed",
-    "detail": "+919667172535 — Candidate interested in offline SOC Analyst batch at Kapoorthala ...",
-    "time": "Just now",
-    "tone": "green",
-    "created_at": "2026-10-27T16:22:46.214Z"
-  },
-  {
-    "id": "act-1793118166189",
-    "type": "chat_reply",
-    "title": "Sarah WhatsApp AI Reply",
-    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
-    "time": "Just now",
-    "tone": "green",
-    "created_at": "2026-10-27T16:22:46.189Z"
-  },
-  {
-    "id": "act-1793118158027",
-    "type": "lead_booked",
-    "title": "Consultation Scheduled",
-    "detail": "Security Test Candidate — SOC Analyst Career Counseling (11:00 AM)",
-    "time": "Just now",
-    "tone": "blue",
-    "created_at": "2026-10-27T16:22:38.027Z"
-  },
-  {
-    "id": "act-1793116896163",
-    "type": "call_completed",
-    "title": "Call Session Completed",
-    "detail": "+919667172535 — Candidate interested in offline SOC Analyst batch at Kapoorthala ...",
-    "time": "Just now",
-    "tone": "green",
-    "created_at": "2026-10-27T16:01:36.163Z"
   }
 ]

@@ -50,9 +50,19 @@ async function runScenarioTests() {
 
   // ── Scenario 2: Webhook Idempotency (Vapi Retry Deduplication) ──────────────
   console.log('\n[Scenario Group 2: Webhook Idempotency & Deduplication]');
+
+  // Clean up any previous test appointment for Idempotency Test Candidate to avoid collision
+  const prevAppts = await (await fetch(`${BASE_URL}/api/appointments`)).json();
+  for (const a of prevAppts) {
+    if ((a.candidate_name || a.patient_name) === 'Idempotency Test Candidate') {
+      await fetch(`${BASE_URL}/api/appointments/${a.id}`, { method: 'DELETE' });
+    }
+  }
+
   const initialApptCount = (await (await fetch(`${BASE_URL}/api/appointments`)).json()).length;
 
   const testToolCallId = `tc-idempotent-${Date.now()}`;
+  const testDate = `2026-11-${String(Math.floor(Math.random() * 20) + 10).padStart(2, '0')}`;
   const bookingPayload = {
     message: {
       type: 'tool-calls',
@@ -64,7 +74,7 @@ async function runScenarioTests() {
             patient_name: 'Idempotency Test Candidate',
             phone: '+919648777706',
             service: 'SOC Analyst Demo Session',
-            appointment_date: '2026-11-05',
+            appointment_date: testDate,
             appointment_time: '12:00 PM',
             notes: 'Automated idempotency verification'
           })

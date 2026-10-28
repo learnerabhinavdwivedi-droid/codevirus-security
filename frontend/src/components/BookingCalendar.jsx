@@ -363,8 +363,9 @@ export default function BookingCalendar({ appointments, onOpenBookingModal }) {
                   <div
                     key={h}
                     onClick={() => {
-                      showToast('Selected Slot', `Booking slot clicked for ${w.dayName} ${formatHour(h)}`, 'info');
-                      onOpenBookingModal();
+                      const timeStr = `${h > 12 ? (h - 12).toString().padStart(2, '0') : h.toString().padStart(2, '0')}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+                      showToast('Slot Selected', `${w.dayName}, ${w.dayNum} ${w.monthName} at ${timeStr}`, 'info');
+                      onOpenBookingModal({ date: w.isoDate, time: timeStr });
                     }}
                     style={{
                       height: 60,

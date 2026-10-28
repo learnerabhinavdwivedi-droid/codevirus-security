@@ -19,6 +19,12 @@ function MainApp() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isDialerOpen, setIsDialerOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+  const [bookingPreset, setBookingPreset] = useState(null);
+
+  const handleOpenBooking = (preset = null) => {
+    setBookingPreset(preset);
+    setIsBookingOpen(true);
+  };
 
   // Fetch Config & Health
   useEffect(() => {
@@ -80,7 +86,7 @@ function MainApp() {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenBooking={() => setIsBookingOpen(true)}
+        onOpenBooking={() => handleOpenBooking(null)}
         onOpenDialer={() => setIsDialerOpen(true)}
         onOpenVoice={() => setIsVoiceOpen(true)}
         systemHealth={systemHealth}
@@ -93,19 +99,23 @@ function MainApp() {
             dormantLeads={dormantLeads}
             activityFeed={activityFeed}
             onRefresh={loadData}
-            onOpenBookingModal={() => setIsBookingOpen(true)}
+            onOpenBookingModal={handleOpenBooking}
             onOpenDialerModal={() => setIsDialerOpen(true)}
             isBookingOpen={isBookingOpen}
             setIsBookingOpen={setIsBookingOpen}
             isDialerOpen={isDialerOpen}
             setIsDialerOpen={setIsDialerOpen}
+            bookingPreset={bookingPreset}
           />
         )}
 
         {activeTab === 'calendar' && (
           <BookingCalendar
             appointments={appointments}
-            onOpenBookingModal={() => setIsBookingOpen(true)}
+            onOpenBookingModal={(preset) => {
+              handleOpenBooking(preset);
+              setActiveTab('dashboard');
+            }}
           />
         )}
 

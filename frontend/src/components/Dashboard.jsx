@@ -16,7 +16,8 @@ export default function Dashboard({
   isBookingOpen,
   setIsBookingOpen,
   isDialerOpen,
-  setIsDialerOpen
+  setIsDialerOpen,
+  bookingPreset
 }) {
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,6 +36,16 @@ export default function Dashboard({
     appointment_time: '11:30 AM',
     notes: ''
   });
+
+  useEffect(() => {
+    if (bookingPreset) {
+      setBookingForm((prev) => ({
+        ...prev,
+        appointment_date: bookingPreset.date || prev.appointment_date,
+        appointment_time: bookingPreset.time || prev.appointment_time
+      }));
+    }
+  }, [bookingPreset]);
 
   // Outbound Dialer Form State
   const [dialerForm, setDialerForm] = useState({
