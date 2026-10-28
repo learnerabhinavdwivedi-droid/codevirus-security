@@ -1,7 +1,17 @@
 import React from 'react';
-import { Shield, LayoutDashboard, Calendar, MessageSquare, PhoneCall, Plus, Sparkles, Activity } from 'lucide-react';
+import { Shield, LayoutDashboard, Calendar, MessageSquare, PhoneCall, Plus, Sparkles, Activity, Lock, LogOut, User } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, onOpenBooking, onOpenDialer, onOpenVoice, systemHealth }) {
+export default function Navbar({
+  activeTab,
+  setActiveTab,
+  onOpenBooking,
+  onOpenDialer,
+  onOpenVoice,
+  systemHealth,
+  currentUser,
+  onOpenAuth,
+  onLogout
+}) {
   return (
     <header
       style={{
@@ -249,6 +259,77 @@ export default function Navbar({ activeTab, setActiveTab, onOpenBooking, onOpenD
             <Plus size={15} />
             <span>Book</span>
           </button>
+
+          {/* Counselor Auth Status / Login */}
+          {currentUser ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: 10,
+                padding: '4px 10px'
+              }}
+            >
+              <div
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: '50%',
+                  background: '#C9A56A',
+                  color: '#0A1F44',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 11,
+                  fontWeight: 700
+                }}
+              >
+                {currentUser.name ? currentUser.name[0] : 'S'}
+              </div>
+              <div style={{ lineHeight: 1.1 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#ffffff' }}>{currentUser.name}</div>
+                <div style={{ fontSize: 9.5, color: '#00C9A7' }}>{currentUser.role}</div>
+              </div>
+              <button
+                onClick={onLogout}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.4)',
+                  cursor: 'pointer',
+                  padding: 2,
+                  marginLeft: 4
+                }}
+                title="Sign out"
+              >
+                <LogOut size={13} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#ffffff',
+                borderRadius: 10,
+                padding: '8px 12px',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title="Staff Counselor Login"
+            >
+              <Lock size={13} color="#C9A56A" />
+              <span>Staff Login</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

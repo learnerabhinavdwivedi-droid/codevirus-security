@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import BookingCalendar from './components/BookingCalendar';
 import WhatsAppConsole from './components/WhatsAppConsole';
 import LiveVoiceModal from './components/LiveVoiceModal';
+import AuthModal from './components/AuthModal';
 import { ToastProvider, useToast } from './components/Toast';
 
 function MainApp() {
@@ -14,6 +15,24 @@ function MainApp() {
   const [appointments, setAppointments] = useState([]);
   const [dormantLeads, setDormantLeads] = useState([]);
   const [activityFeed, setActivityFeed] = useState([]);
+
+  // Auth state
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('codevirus_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('codevirus_auth_token');
+    localStorage.removeItem('codevirus_user');
+    setCurrentUser(null);
+    showToast('Signed Out', 'You have been logged out successfully.', 'info');
+  };
 
   // Modals state
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -90,6 +109,9 @@ function MainApp() {
         onOpenDialer={() => setIsDialerOpen(true)}
         onOpenVoice={() => setIsVoiceOpen(true)}
         systemHealth={systemHealth}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onLogout={handleLogout}
       />
 
       <main style={{ flex: 1 }}>
@@ -127,6 +149,13 @@ function MainApp() {
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}
         config={config}
+      />
+
+      {/* Staff Counselor Login Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={(user) => setCurrentUser(user)}
       />
     </div>
   );

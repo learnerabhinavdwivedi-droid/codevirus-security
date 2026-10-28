@@ -4,51 +4,35 @@
     "patient_name": "Aarav Sharma",
     "phone": "+919667172535",
     "service": "SOC Analyst Career Counseling",
-    "appointment_date": "2026-10-27",
+    "appointment_date": "2026-10-28",
     "appointment_time": "10:00 AM",
     "status": "completed",
     "source": "sarah",
     "notes": "Interested in placement guarantee & SIEM labs",
-    "created_at": "2026-10-27T14:47:03.361Z"
+    "created_at": "2026-10-28T08:05:21.199Z"
   },
   {
     "id": "appt-2",
     "patient_name": "Priya Tiwari",
     "phone": "+919667172535",
     "service": "VAPT & Network Security Audit",
-    "appointment_date": "2026-10-27",
+    "appointment_date": "2026-10-28",
     "appointment_time": "2:00 PM",
     "status": "confirmed",
     "source": "sarah",
     "notes": "Enterprise web app pentesting scope",
-    "created_at": "2026-10-27T15:17:03.361Z"
+    "created_at": "2026-10-28T08:35:21.200Z"
   },
   {
     "id": "appt-3",
     "patient_name": "Siddharth Dubey",
     "phone": "+919839012345",
     "service": "Ethical Hacking & Bug Bounty",
-    "appointment_date": "2026-10-27",
+    "appointment_date": "2026-10-28",
     "appointment_time": "4:30 PM",
     "status": "confirmed",
     "source": "front-desk",
     "notes": "Kapoorthala offline batch inquiry",
-    "created_at": "2026-10-27T15:47:03.361Z"
-  },
-  {
-    "id": "appt-1793177171545",
-    "patient_name": "Idempotency Test Candidate",
-    "candidate_name": "Idempotency Test Candidate",
-    "phone": "+919648777706",
-    "email": null,
-    "service": "SOC Analyst Demo Session",
-    "appointment_date": "2026-11-10",
-    "appointment_time": "12:00 PM",
-    "status": "confirmed",
-    "source": "sarah",
-    "counselor": "Ankit Rai (Senior Trainer)",
-    "batch_preference": "Kapoorthala Offline Lab",
-    "notes": "Automated idempotency verification",
-    "created_at": "2026-10-28T08:46:11.545Z"
+    "created_at": "2026-10-28T09:05:21.200Z"
   }
 ]

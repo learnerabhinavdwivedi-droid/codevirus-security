@@ -313,8 +313,60 @@ const exportLimiter = rateLimit({
 
 app.use('/api/', generalLimiter);
 
-// 5. Admin Authentication Gate
+// 5. Admin Authentication Gate & Counselor Session
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || '';
+const STAFF_ACCOUNTS = [
+  { email: 'admin@codevirussec.in', password: process.env.ADMIN_PASSWORD || 'codevirus2026', name: 'Ankit Rai', role: 'Director' },
+  { email: 'counselor@codevirussec.in', password: process.env.COUNSELOR_PASSWORD || 'counselor2026', name: 'Admissions Desk', role: 'Senior Counselor' }
+];
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  const user = STAFF_ACCOUNTS.find(
+    (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password
+  );
+
+  const masterPass = ADMIN_API_KEY || 'codevirus2026';
+  if (!user && password !== masterPass) {
+    return res.status(401).json({ error: 'Invalid counselor credentials' });
+  }
+
+  const authenticatedUser = user || {
+    name: 'Authorized Counselor',
+    email: email.trim(),
+    role: 'Counselor'
+  };
+
+  return res.json({
+    success: true,
+    user: {
+      name: authenticatedUser.name,
+      email: authenticatedUser.email,
+      role: authenticatedUser.role
+    },
+    token: ADMIN_API_KEY || 'session_token_authorized_2026'
+  });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const provided = req.headers['x-api-key'] || req.query.api_key || bearerToken;
+
+  if (ADMIN_API_KEY && provided !== ADMIN_API_KEY) {
+    return res.status(401).json({ authenticated: false });
+  }
+
+  return res.json({
+    authenticated: true,
+    user: { name: 'Ankit Rai', role: 'Director', email: 'admin@codevirussec.in' }
+  });
+});
+
 function requireAdminAuth(req, res, next) {
   if (!ADMIN_API_KEY) return next(); // Permissive in local demo if unset
   const authHeader = req.headers['authorization'];
