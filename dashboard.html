@@ -998,20 +998,23 @@
       const icsBtn = `<a href="/api/appointments/${row.id}/calendar.ics" download style="text-decoration:none;font-size:11px;font-weight:600;padding:4px 8px;border-radius:7px;background:rgba(37,99,235,.08);color:#2563EB;border:1px solid rgba(37,99,235,.22);display:inline-flex;align-items:center;gap:3px;" title="Add to Calendar (.ics)">📅 .ics</a>`;
       let statusBtn = '';
       if (row.status === 'confirmed') {
-        statusBtn = `<button style="${ghostActionStyle('red')}" data-g="danger" onmouseenter="ghostIn(event)" onmouseleave="ghostOut(event)" onclick="markNoShow('${row.id}','${phone}','${name}')">No-Show</button>`;
+        statusBtn = `<button style="${ghostActionStyle('red')}" data-g="danger" onmouseenter="ghostIn(event)" onmouseleave="ghostOut(event)" onclick="markNoShow('${row.id}')">No-Show</button>`;
       } else if (row.status === 'completed') {
-        statusBtn = `<button style="${ghostActionStyle('gold')}" onmouseenter="ghostIn(event)" onmouseleave="ghostOut(event)" onclick="triggerRowFollowUp('${row.id}','${phone}','${name}')">Follow-Up</button>`;
+        statusBtn = `<button style="${ghostActionStyle('gold')}" onmouseenter="ghostIn(event)" onmouseleave="ghostOut(event)" onclick="triggerRowFollowUp('${row.id}')">Follow-Up</button>`;
       } else if (row.status === 'follow_up_sent') {
         statusBtn = `<span style="font-size:11.5px;color:rgba(10,31,68,.4);font-style:italic">Follow-up sent ✓</span>`;
       } else if (row.status === 'no_show') {
         statusBtn = `<span style="font-size:11.5px;color:rgba(10,31,68,.4);font-style:italic">Recovery sent ✓</span>`;
       }
-      const delBtn = `<button onclick="deleteRow('${row.id}','${name}')" style="background:none;border:none;cursor:pointer;color:rgba(10,31,68,.3);font-size:13px;padding:3px;" title="Delete consultation">🗑️</button>`;
+      const delBtn = `<button onclick="deleteRow('${row.id}')" style="background:none;border:none;cursor:pointer;color:rgba(10,31,68,.3);font-size:13px;padding:3px;" title="Delete consultation">🗑️</button>`;
 
       return `<div style="display:inline-flex;align-items:center;gap:5px;justify-content:flex-end;">${waBtn}${icsBtn}${statusBtn}${delBtn}</div>`;
     }
 
-    window.triggerRowFollowUp = async function(id, phone, name) {
+    window.triggerRowFollowUp = async function(id) {
+      const row = appointments.find(a => a.id === id);
+      const name = row?.candidate_name || row?.patient_name || 'Candidate';
+      const phone = row?.phone;
       if (!phone) { showToast('Missing Phone', 'No phone number for ' + name, 'info'); return; }
       try {
         const res = await fetch(`${SERVER}/trigger-outbound`, {
@@ -1173,7 +1176,9 @@
       }
     };
 
-    window.deleteRow = async function(id, name) {
+    window.deleteRow = async function(id) {
+      const row = appointments.find(a => a.id === id);
+      const name = row?.candidate_name || row?.patient_name || 'candidate';
       if (!confirm('Remove consultation for ' + name + '?')) return;
       try {
         await fetch('/api/appointments/' + id, { method: 'DELETE' });
@@ -1186,7 +1191,11 @@
 
 
     // ── Mark No-Show ──────────────────────────────────
-    window.markNoShow = async function(id, phone, patientName) {
+    window.markNoShow = async function(id) {
+      const row = appointments.find(a => a.id === id);
+      const patientName = row?.candidate_name || row?.patient_name || 'Candidate';
+      const phone = row?.phone || '';
+
       // 1. Update server store
       try {
         await fetch(`${SERVER}/api/appointments/${id}/status`, {
@@ -1413,7 +1422,12 @@
 
     // ── Util ──────────────────────────────────────────
     function esc(str) {
-      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // ── Start ─────────────────────────────────────────

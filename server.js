@@ -5,9 +5,11 @@
 
 require('dotenv').config();
 
-const express  = require('express');
-const cors     = require('cors');
-const fetch    = require('node-fetch');
+const express   = require('express');
+const cors      = require('cors');
+const helmet    = require('helmet');
+const rateLimit = require('express-rate-limit');
+const fetch     = require('node-fetch');
 const { createClient } = require('@supabase/supabase-js');
 const fs       = require('fs');
 const path     = require('path');
@@ -171,12 +173,126 @@ async function refreshAssistantDate() {
   }
 }
 
-// ── Express App ───────────────────────────────────────────────────────────────
+// ── Express App & Security Hardening ──────────────────────────────────────────
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
+
+// 1. Security Headers (Helmet)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://esm.sh", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://*"],
+      connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "https://api.vapi.ai", "wss://*.vapi.ai", "https://*.loca.lt", "https://*.ngrok-free.app", "http://localhost:*", "ws://localhost:*"],
+      frameSrc: ["'self'"],
+      objectSrc: ["'none'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
+// 2. CORS Policy
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+  : null;
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || !allowedOrigins || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS origin blocked by security policy'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+  credentials: true
+}));
+
+// 3. Body Parsers with payload limits (prevents payload flood DoS)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// 4. Rate Limiters (Abuse & DoS Protection)
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests from this IP, please try again later.' }
+});
+
+const outboundCallLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Outbound telephony rate limit reached. Please wait before triggering more calls.' }
+});
+
+const chatReplyLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Chat reply rate limit exceeded. Please wait a moment.' }
+});
+
+const exportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Data export rate limit reached.' }
+});
+
+app.use('/api/', generalLimiter);
+
+// 5. Admin Authentication Gate
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY || '';
+function requireAdminAuth(req, res, next) {
+  if (!ADMIN_API_KEY) return next(); // Permissive in local demo if unset
+  const authHeader = req.headers['authorization'];
+  const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const provided = req.headers['x-api-key'] || req.query.api_key || bearerToken;
+  if (provided === ADMIN_API_KEY) return next();
+  return res.status(401).json({ error: 'Unauthorized: valid admin API key required' });
+}
+
+// 6. Whitelisted Public Static File Server (Prevents .env, source code, and data leaks)
+const ALLOWED_STATIC_FILES = new Set([
+  'dashboard.html',
+  'BookingCalendar.html',
+  'whatsapp.html',
+  'logo-navy.png',
+  'chat-wallpaper.png',
+  'wa-icon.svg',
+  'manifest.json'
+]);
+
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+
+  const cleanPath = req.path.replace(/^\/+/, '');
+  if (!cleanPath) return next();
+
+  if (ALLOWED_STATIC_FILES.has(cleanPath)) {
+    return res.sendFile(path.join(__dirname, cleanPath));
+  }
+
+  // Explicitly block any access to private files, dotfiles, source scripts, or database stores
+  if (
+    cleanPath.startsWith('.') ||
+    cleanPath.startsWith('data/') ||
+    cleanPath.startsWith('node_modules/') ||
+    /\.(env|json|js|sql|bat|sh|yml|yaml|md|lock|zip|tar|gz|bak)$/i.test(cleanPath)
+  ) {
+    return res.status(403).json({ error: 'Access forbidden: protected resource' });
+  }
+
+  next();
+});
 
 app.get('/', (_req, res) => {
   res.redirect('/dashboard.html');
@@ -186,7 +302,7 @@ app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     company: 'Codevirus Security',
-    assistantId: config.assistantId,
+    assistantId: config.assistantId || null,
     tunnel: config.webhookUrl || null
   });
 });
@@ -194,14 +310,13 @@ app.get('/health', (_req, res) => {
 app.get('/config', (_req, res) => {
   reloadConfig();
   res.json({
-    assistantId:   config.assistantId,
-    phoneNumberId: config.phoneNumberId,
-    vapiKey:       config.vapiPublicKey || config.vapiKey || VAPI_PUBLIC_KEY,
-    vapiPublicKey: config.vapiPublicKey || VAPI_PUBLIC_KEY,
-    supabaseUrl:   config.supabaseUrl || SUPABASE_URL,
+    assistantId:     config.assistantId || null,
+    phoneNumberId:   config.phoneNumberId || null,
+    vapiPublicKey:   config.vapiPublicKey || VAPI_PUBLIC_KEY || null,
+    supabaseUrl:     config.supabaseUrl || SUPABASE_URL || null,
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
-    webhookUrl:    config.webhookUrl || null,
-    tunnelUrl:     config.tunnelUrl || null
+    webhookUrl:      config.webhookUrl || null,
+    tunnelUrl:       config.tunnelUrl || null
   });
 });
 
@@ -420,7 +535,7 @@ Guidelines:
   return 'Thank you for reaching out to Codevirus Security! I can help you with SOC Analyst training, Ethical Hacking certifications, or enterprise VAPT audits. Would you like me to book a quick consultation for you?';
 }
 
-app.post('/api/chat-reply', async (req, res) => {
+app.post('/api/chat-reply', chatReplyLimiter, async (req, res) => {
   const { message, chat_id, history } = req.body;
   if (!message) {
     return res.status(400).json({ error: 'message is required' });
@@ -521,14 +636,14 @@ function escapeXml(unsafe) {
 }
 
 // ── Real Data Export Endpoints (CSV & iCal) ───────────────────────────────────
-app.get('/api/export/consultations.csv', (_req, res) => {
+app.get('/api/export/consultations.csv', exportLimiter, requireAdminAuth, (_req, res) => {
   const csv = store.exportConsultationsCSV();
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="codevirus-consultations.csv"');
   res.send(csv);
 });
 
-app.get('/api/export/leads.csv', (_req, res) => {
+app.get('/api/export/leads.csv', exportLimiter, requireAdminAuth, (_req, res) => {
   const csv = store.exportLeadsCSV();
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="codevirus-leads.csv"');
@@ -735,7 +850,7 @@ app.post(['/webhook', '/api/vapi-webhook', '/api/webhook'], async (req, res) => 
 });
 
 // ── Outbound Call Trigger ─────────────────────────────────────────────────────
-app.post('/trigger-outbound', async (req, res) => {
+app.post('/trigger-outbound', outboundCallLimiter, requireAdminAuth, async (req, res) => {
   const { phone, patient_name, call_type } = req.body;
 
   if (!phone || !patient_name) {
@@ -952,6 +1067,20 @@ async function pollDemoLeads() {
 }
 
 setInterval(pollDemoLeads, 5000);
+
+// ── 404 & Centralized Error Handlers ──────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ error: 'Endpoint or resource not found' });
+});
+
+app.use((err, _req, res, _next) => {
+  console.error('[SERVER ERROR]', err.stack || err.message || err);
+  const isProd = process.env.NODE_ENV === 'production';
+  res.status(err.status || 500).json({
+    error: isProd ? 'Internal server error' : (err.message || 'Internal server error'),
+    ...(isProd ? {} : { stack: err.stack })
+  });
+});
 
 // ── Export app and start function for unified runner ──────────────────────────
 function startServer() {

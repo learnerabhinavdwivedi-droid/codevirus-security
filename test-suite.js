@@ -231,6 +231,43 @@ async function runTests() {
     process.exit(1);
   }
 
+  console.log('\n--- 5. Testing Application Security & Hardening ---');
+  // Check that sensitive files cannot be fetched via HTTP
+  const sensitiveFiles = ['/.env', '/server.js', '/config.json', '/data/activity.json', '/package.json'];
+  for (const sf of sensitiveFiles) {
+    const sRes = await fetch(`http://localhost:3000${sf}`);
+    if (sRes.status === 403 || sRes.status === 404) {
+      console.log(`✓ GET ${sf} -> ${sRes.status} Forbidden/Blocked (Secret Protected)`);
+    } else {
+      console.error(`❌ Security failure: ${sf} is publicly accessible with status ${sRes.status}!`);
+      process.exit(1);
+    }
+  }
+
+  // Check Security Headers
+  const secRes = await fetch('http://localhost:3000/health');
+  const nosniff = secRes.headers.get('x-content-type-options');
+  const frameOpt = secRes.headers.get('x-frame-options');
+  const poweredBy = secRes.headers.get('x-powered-by');
+
+  if (nosniff === 'nosniff') {
+    console.log(`✓ X-Content-Type-Options: nosniff verified`);
+  } else {
+    console.warn(`⚠ Missing X-Content-Type-Options header`);
+  }
+
+  if (frameOpt === 'SAMEORIGIN') {
+    console.log(`✓ X-Frame-Options: SAMEORIGIN verified (Clickjacking protection)`);
+  } else {
+    console.warn(`⚠ Missing X-Frame-Options header`);
+  }
+
+  if (!poweredBy) {
+    console.log(`✓ X-Powered-By hidden (Fingerprint protection)`);
+  } else {
+    console.warn(`⚠ X-Powered-By is exposed: ${poweredBy}`);
+  }
+
   console.log('\n==================================================');
   console.log('🎉 ALL INTEGRATION, SECURITY & COLLISION TESTS PASSED (100%)');
   console.log('==================================================\n');

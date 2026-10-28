@@ -301,6 +301,36 @@ async function loadMessages(isPoll = false){
   }
 }
 
+// ── message rendering ──
+const scrollEl = document.getElementById('wa-scroll');
+const messagesEl = document.getElementById('wa-messages');
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderMessages(){
+  if (!messagesEl) return;
+  messagesEl.innerHTML = state.messages.map((m, i) => {
+    const prev = state.messages[i-1];
+    const firstOfGroup = !prev || prev.mine !== m.mine;
+    const corner = firstOfGroup ? (m.mine ? 'border-top-right-radius:0;' : 'border-top-left-radius:0;') : '';
+    const metaColor = m.mine ? 'rgba(233,237,239,0.6)' : '#8696a0';
+    return `
+      <div style="display:flex;justify-content:${m.mine ? 'flex-end' : 'flex-start'};margin-top:${firstOfGroup ? '8px' : '2px'};">
+        <div style="width:fit-content;max-width:65%;background:${m.mine ? '#0b473a' : '#1e2427'};border-radius:8px;padding:6px 9px 6px;position:relative;box-shadow:0 1px .5px rgba(0,0,0,.25);${corner}">
+          <span style="font-size:14.2px;line-height:19px;color:#e9edef;word-break:break-word;white-space:pre-wrap;">${escapeHtml(m.text)}</span>
+          <span style="display:inline-flex;float:right;align-items:center;gap:3px;margin-left:10px;margin-top:6px;position:relative;top:3px;">
+            <span style="font-size:11px;color:${metaColor};">${m.time}</span>
+            ${m.mine ? `<span id="tick-${m.id}">${tick(m.status)}</span>` : ''}
+          </span>
+        </div>
+      </div>`;
+  }).join('');
+  if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+  renderActiveRowPreview();
+}
+
 function playMessageChime(){
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -516,7 +546,7 @@ function chatRowHtml({ avatar, name, time, tickIcon, preview, active }){
       </div>
       <div style="display:flex;align-items:center;margin-top:3px;font-size:14px;color:#8696a0;">
         ${tickIcon ? listTick() : ''}
-        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${preview}</span>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(preview)}</span>
       </div>
     </div>
   </div>`;
@@ -540,7 +570,7 @@ function renderActiveRowPreview(){
   const row = document.getElementById('active-row');
   if (!row) return;
   row.querySelector('.chat-time').textContent = time;
-  row.querySelector('.chat-preview').innerHTML = `${tickIcon ? listTick() : ''}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${preview}</span>`;
+  row.querySelector('.chat-preview').innerHTML = `${tickIcon ? listTick() : ''}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(preview)}</span>`;
 }
 
 function renderChatList(){
@@ -553,7 +583,7 @@ function renderChatList(){
         <div class="chat-time" style="font-size:12px;color:#8696a0;flex:none;">${time}</div>
       </div>
       <div class="chat-preview" style="display:flex;align-items:center;margin-top:3px;font-size:14px;color:#8696a0;">
-        ${tickIcon ? listTick() : ''}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${preview}</span>
+        ${tickIcon ? listTick() : ''}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(preview)}</span>
       </div>
     </div>
   </div>`;
