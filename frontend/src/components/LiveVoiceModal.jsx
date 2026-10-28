@@ -387,3 +387,4 @@ export default function LiveVoiceModal({ isOpen, onClose, config }) {
     </div>
   );
 }
+

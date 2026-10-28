@@ -225,7 +225,7 @@ const wallpaperData = generateWallpaper();
 
 const targets = [
   path.join(__dirname),
-  path.join(__dirname, 'codevirus-security-agent')
+  path.join(__dirname, 'frontend', 'public')
 ];
 
 targets.forEach(dir => {

@@ -8,9 +8,6 @@ package-lock.json.bak
 .env.*.local
 config.json
 
-# Redundant duplicate builds
-codevirus-security-agent/
-
 # Local storage runtime state (preserve templates, ignore dynamic cache if desired)
 data/*.backup.json
 

@@ -254,3 +254,4 @@ export default function Navbar({ activeTab, setActiveTab, onOpenBooking, onOpenD
     </header>
   );
 }
+

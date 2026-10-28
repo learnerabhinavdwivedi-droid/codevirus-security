@@ -151,5 +151,41 @@
     "is_lead": false,
     "processed": false,
     "created_at": "2026-10-28T08:17:09.830Z"
+  },
+  {
+    "id": "msg-1793175921201",
+    "chat_id": "+91 96487 77706",
+    "sender": "lead",
+    "text": "What are the batch timings for SOC Analyst at Kapoorthala campus?",
+    "is_lead": true,
+    "processed": true,
+    "created_at": "2026-10-28T08:25:21.201Z"
+  },
+  {
+    "id": "msg-1793175922227",
+    "chat_id": "+91 96487 77706",
+    "sender": "business",
+    "text": "Our Certified SOC Analyst program covers Splunk, Wazuh SIEM, EDR, and live incident response with 100% practical lab access! Would you like to attend a free demo session at our Kapoorthala campus or over Zoom this week?",
+    "is_lead": false,
+    "processed": false,
+    "created_at": "2026-10-28T08:25:22.227Z"
+  },
+  {
+    "id": "msg-1793175922265",
+    "chat_id": "+919667172535",
+    "sender": "lead",
+    "text": "I want to enroll in CEH training",
+    "is_lead": true,
+    "processed": true,
+    "created_at": "2026-10-28T08:25:22.265Z"
+  },
+  {
+    "id": "msg-1793175922635",
+    "chat_id": "+919667172535",
+    "sender": "business",
+    "text": "Thank you for reaching out to Codevirus Security! I can help you with SOC Analyst training, Ethical Hacking certifications, or enterprise VAPT audits. Would you like me to book a quick consultation for you?",
+    "is_lead": false,
+    "processed": false,
+    "created_at": "2026-10-28T08:25:22.635Z"
   }
 ]

@@ -1,5 +1,32 @@
 [
   {
+    "id": "act-1793175922244",
+    "type": "call_completed",
+    "title": "Call Session Completed",
+    "detail": "+919667172535 — Candidate interested in offline SOC Analyst batch at Kapoorthala ...",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:25:22.244Z"
+  },
+  {
+    "id": "act-1793175922229",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:25:22.229Z"
+  },
+  {
+    "id": "act-1793175913726",
+    "type": "lead_booked",
+    "title": "Consultation Scheduled",
+    "detail": "Security Test Candidate — SOC Analyst Career Counseling (11:00 AM)",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:25:13.726Z"
+  },
+  {
     "id": "act-1793175429832",
     "type": "chat_reply",
     "title": "Sarah WhatsApp AI Reply",
@@ -150,21 +177,5 @@
     "detail": "Aarav Sharma (+919667172535) — SOC Analyst",
     "time": "10 mins ago",
     "tone": "green"
-  },
-  {
-    "id": "act-2",
-    "type": "lead_booked",
-    "title": "Consultation Confirmed",
-    "detail": "Priya Tiwari — VAPT & Network Security Audit (2:00 PM)",
-    "time": "30 mins ago",
-    "tone": "blue"
-  },
-  {
-    "id": "act-3",
-    "type": "lead_inquiry",
-    "title": "WhatsApp Lead Captured",
-    "detail": "New inquiry for Ethical Hacking Diploma",
-    "time": "1 hour ago",
-    "tone": "gold"
   }
 ]

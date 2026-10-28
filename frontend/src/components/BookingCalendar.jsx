@@ -463,3 +463,4 @@ export default function BookingCalendar({ appointments, onOpenBookingModal }) {
     </div>
   );
 }
+
