@@ -38,3 +38,4 @@
   - Specialization: Network Defense, SIEM (Splunk/Wazuh), Incident Handling, CCNA.
 - **Abhishek Pandey** (Full-Stack Engineer):
   - Specialization: Secure Application Development, MERN Stack, API Security.
+

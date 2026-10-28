@@ -149,13 +149,14 @@ async function main() {
   }
 
   // 3. Open Browser
-  const dashboardUrl = `http://localhost:${PORT}/dashboard.html`;
-  console.log('▶ [3/3] Opening Operations Dashboard in default browser…');
-  console.log(`  → ${dashboardUrl}\n`);
-  setTimeout(() => openBrowser(dashboardUrl), 1000);
+  const appUrl = `http://localhost:${PORT}/`;
+  console.log('▶ [3/3] Opening Codevirus React Suite in default browser…');
+  console.log(`  → ${appUrl}\n`);
+  setTimeout(() => openBrowser(appUrl), 1000);
 
   console.log('══════════════════════════════════════════════════════════════');
   console.log('  🟢 ALL SYSTEMS RUNNING');
+  console.log('  • Modern React App:     http://localhost:' + PORT + '/');
   console.log('  • Operations Dashboard: http://localhost:' + PORT + '/dashboard.html');
   console.log('  • Calendar Diary:       http://localhost:' + PORT + '/BookingCalendar.html');
   console.log('  • WhatsApp Demo:        http://localhost:' + PORT + '/whatsapp.html');

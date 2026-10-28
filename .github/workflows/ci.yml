@@ -23,6 +23,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Build React Frontend
+        run: |
+          npm --prefix frontend install
+          npm --prefix frontend run build
+
       - name: Verify JavaScript Syntax
         run: |
           node -c server.js
@@ -48,3 +53,4 @@ jobs:
       - name: Run Scenario & Knowledge Base Tests
         run: |
           node scenario-test-suite.js
+

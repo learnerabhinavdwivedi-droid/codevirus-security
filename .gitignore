@@ -18,6 +18,7 @@ data/*.backup.json
 *.zip
 *.tar.gz
 dist/
+!frontend/dist/
 build/
 
 # IDE & system artifacts

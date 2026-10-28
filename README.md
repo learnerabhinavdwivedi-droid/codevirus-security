@@ -41,12 +41,22 @@ node windows-service.js
 
 | Interface | URL | Purpose |
 |---|---|---|
+| **Modern React App (Single-Page App)** | [http://localhost:3000/](http://localhost:3000/) | Unified React UI with Tab Switcher, WebRTC Voice Agent, CRM & Diary |
 | **Operations Dashboard** | [http://localhost:3000/dashboard.html](http://localhost:3000/dashboard.html) | Live call center, candidate intake, CSV exports, `.ics` sync, and test dialer |
 | **Consultation Diary** | [http://localhost:3000/BookingCalendar.html](http://localhost:3000/BookingCalendar.html) | Weekly schedule (10:00–22:00 IST) for training & enterprise VAPT sessions |
 | **WhatsApp Business Console** | [http://localhost:3000/whatsapp.html](http://localhost:3000/whatsapp.html) | Live WhatsApp Business CRM console with real-time incoming message polling |
 | **Export Consultations CSV** | [http://localhost:3000/api/export/consultations.csv](http://localhost:3000/api/export/consultations.csv) | Direct CSV download of all consultation records for Excel / Google Sheets |
 | **Export Leads CSV** | [http://localhost:3000/api/export/leads.csv](http://localhost:3000/api/export/leads.csv) | Direct CSV download of all WhatsApp and phone leads |
 | **System Health Check** | [http://localhost:3000/health](http://localhost:3000/health) | Realtime system health, Vapi assistant status, and tunnel state |
+
+### ⚛️ Frontend Development (React + Vite)
+```bash
+# Build React app for production (bundles into frontend/dist)
+npm run build
+
+# Start Vite live hot-reloading dev server on port 5173
+npm run dev:frontend
+```
 
 ---
 

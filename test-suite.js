@@ -31,6 +31,7 @@ async function runTests() {
 
   console.log('\n--- 2. Testing Static Files & Assets ---');
   const staticFiles = [
+    '/',
     '/dashboard.html',
     '/BookingCalendar.html',
     '/whatsapp.html',

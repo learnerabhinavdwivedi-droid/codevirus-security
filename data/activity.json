@@ -1,5 +1,68 @@
 [
   {
+    "id": "act-1793175429832",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:17:09.832Z"
+  },
+  {
+    "id": "act-1793175429134",
+    "type": "call_transferred",
+    "title": "Call Transferred to Counselor",
+    "detail": "Enterprise Client transferred to +919648777706 — Reason: urgent_vapt_scoping",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:17:09.134Z"
+  },
+  {
+    "id": "act-1793175415048",
+    "type": "whatsapp_confirmed",
+    "title": "WhatsApp Confirmation Sent",
+    "detail": "+919648777706 — Booking confirmed for 2026-11-05 (SOC Analyst Demo Session)",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:16:55.048Z"
+  },
+  {
+    "id": "act-1793175415034",
+    "type": "lead_booked",
+    "title": "Consultation Scheduled",
+    "detail": "Idempotency Test Candidate — SOC Analyst Demo Session (12:00 PM)",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:16:55.034Z"
+  },
+  {
+    "id": "act-1793175390806",
+    "type": "call_completed",
+    "title": "Call Session Completed",
+    "detail": "+919667172535 — Candidate interested in offline SOC Analyst batch at Kapoorthala ...",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:16:30.806Z"
+  },
+  {
+    "id": "act-1793175390791",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Our Certified SOC Analyst program covers Splunk, W...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T08:16:30.791Z"
+  },
+  {
+    "id": "act-1793175382311",
+    "type": "lead_booked",
+    "title": "Consultation Scheduled",
+    "detail": "Security Test Candidate — SOC Analyst Career Counseling (11:00 AM)",
+    "time": "Just now",
+    "tone": "blue",
+    "created_at": "2026-10-28T08:16:22.311Z"
+  },
+  {
     "id": "act-1793118286920",
     "type": "call_completed",
     "title": "Call Session Completed",
