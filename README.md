@@ -5,6 +5,8 @@ Autonomous AI Voice Receptionist, Lead Qualification, CRM & Consultation Schedul
 
 Powered by **Vapi AI (Voice Orchestration)** + **Deepgram Nova-2 (Speech-to-Text)** + **Cartesia / ElevenLabs (Indian Accent Synthesis)** + **OpenAI GPT-4o (Lead Intelligence)** + **Meta WhatsApp Cloud API / Twilio WhatsApp** + **Dual-Layer Database (Supabase Cloud + Local Atomic Store)**.
 
+> 📖 **Standard Operating Procedure (SOP) & Runbook**: See [OPERATIONAL_PROCEDURES.md](OPERATIONAL_PROCEDURES.md) for full architecture diagrams, setup checklists, Indian SIP telephony instructions, security hardening, and disaster recovery.
+
 ---
 
 ## ⚡ Quick Launch Options
