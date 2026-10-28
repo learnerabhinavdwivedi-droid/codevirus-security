@@ -207,3 +207,4 @@ runAudit().catch((err) => {
   console.error('Audit encountered unexpected error:', err);
   process.exit(1);
 });
+

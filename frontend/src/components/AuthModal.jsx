@@ -222,3 +222,4 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     </div>
   );
 }
+

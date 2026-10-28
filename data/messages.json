@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "msg-1793178618051",
+    "chat_id": "browser-voice-session",
+    "sender": "lead",
+    "text": "hello",
+    "is_lead": true,
+    "processed": true,
+    "created_at": "2026-10-28T09:10:18.051Z"
+  },
+  {
+    "id": "msg-1793178619149",
+    "chat_id": "browser-voice-session",
+    "sender": "business",
+    "text": "Hello! Welcome to Codevirus Security & Academy. I am Sarah, AI coordinator for our Lucknow campus. Are you looking for industrial cybersecurity training or enterprise VAPT security audits?",
+    "is_lead": false,
+    "processed": false,
+    "created_at": "2026-10-28T09:10:19.149Z"
+  }
+]

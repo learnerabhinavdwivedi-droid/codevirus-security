@@ -1,5 +1,14 @@
 [
   {
+    "id": "act-1793178619150",
+    "type": "chat_reply",
+    "title": "Sarah WhatsApp AI Reply",
+    "detail": "Replying: \"Hello! Welcome to Codevirus Security & Academy. I ...\"",
+    "time": "Just now",
+    "tone": "green",
+    "created_at": "2026-10-28T09:10:19.150Z"
+  },
+  {
     "id": "act-1",
     "type": "call_completed",
     "title": "Outbound Follow-Up Completed",
