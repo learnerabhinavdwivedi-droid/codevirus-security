@@ -25,14 +25,78 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // ── Constants & Environment ───────────────────────────────────────────────────
-const PORT              = Number(process.env.PORT) || 3000;
-const VAPI_PRIVATE_KEY  = process.env.VAPI_PRIVATE_KEY  || '';
-const VAPI_PUBLIC_KEY   = process.env.VAPI_PUBLIC_KEY   || '';
-const OPENAI_API_KEY    = process.env.OPENAI_API_KEY    || '';
-const SUPABASE_URL      = process.env.SUPABASE_URL      || '';
-const SUPABASE_SERVICE  = process.env.SUPABASE_SERVICE  || '';
+const PORT                = Number(process.env.PORT) || 3000;
+const VAPI_PRIVATE_KEY    = process.env.VAPI_PRIVATE_KEY    || '';
+const VAPI_PUBLIC_KEY     = process.env.VAPI_PUBLIC_KEY     || '';
+const VAPI_WEBHOOK_SECRET = process.env.VAPI_WEBHOOK_SECRET || '';
+const INDIA_PHONE_NUMBER  = process.env.INDIA_PHONE_NUMBER  || '+919648777706';
+const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      || '';
+const SUPABASE_URL        = process.env.SUPABASE_URL        || '';
+const SUPABASE_SERVICE    = process.env.SUPABASE_SERVICE    || '';
 
 const supabase = (SUPABASE_URL && SUPABASE_SERVICE) ? createClient(SUPABASE_URL, SUPABASE_SERVICE) : null;
+
+// ── Webhook Idempotency Store (Prevents Duplicate Bookings on Retry) ───────────
+const processedToolCalls = new Map();
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of processedToolCalls.entries()) {
+    if (now - v.timestamp > 15 * 60 * 1000) processedToolCalls.delete(k);
+  }
+}, 5 * 60 * 1000);
+
+// ── Knowledge Base Retrieval Engine ───────────────────────────────────────────
+const KB_DIR = path.join(__dirname, 'knowledge-base');
+let kbDocuments = [];
+
+function loadKnowledgeBase() {
+  kbDocuments = [];
+  if (!fs.existsSync(KB_DIR)) return;
+  const files = fs.readdirSync(KB_DIR);
+  for (const f of files) {
+    if (f.endsWith('.md')) {
+      const fullPath = path.join(KB_DIR, f);
+      const text = fs.readFileSync(fullPath, 'utf8');
+      kbDocuments.push({ file: f, title: f.replace('.md', ''), content: text });
+    }
+  }
+}
+loadKnowledgeBase();
+
+function searchKnowledgeBase(query) {
+  if (!query || typeof query !== 'string') return { status: 'not_found', message: 'Empty query' };
+  const tokens = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+  
+  const scored = kbDocuments.map(doc => {
+    let score = 0;
+    const lowerContent = doc.content.toLowerCase();
+    for (const t of tokens) {
+      const count = (lowerContent.match(new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+      score += count;
+    }
+    return { doc, score };
+  }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+
+  if (!scored.length) {
+    return {
+      status: 'not_found',
+      message: 'No exact verified record in knowledge base. Deferring to admissions counselor demo session.'
+    };
+  }
+
+  const bestDoc = scored[0].doc;
+  const paragraphs = bestDoc.content.split('\n\n');
+  const matchingParagraph = paragraphs.find(p => {
+    const lp = p.toLowerCase();
+    return tokens.some(t => lp.includes(t));
+  }) || paragraphs[0];
+
+  return {
+    status: 'found',
+    source: bestDoc.file,
+    summary: matchingParagraph.trim()
+  };
+}
 
 // Load config.json and ensure vapiKey is always the browser-safe Public Key
 let config = {
@@ -310,14 +374,22 @@ app.get('/health', (_req, res) => {
 app.get('/config', (_req, res) => {
   reloadConfig();
   res.json({
-    assistantId:     config.assistantId || null,
-    phoneNumberId:   config.phoneNumberId || null,
-    vapiPublicKey:   config.vapiPublicKey || VAPI_PUBLIC_KEY || null,
-    supabaseUrl:     config.supabaseUrl || SUPABASE_URL || null,
-    supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
-    webhookUrl:      config.webhookUrl || null,
-    tunnelUrl:       config.tunnelUrl || null
+    assistantId:      config.assistantId || null,
+    phoneNumberId:    config.phoneNumberId || null,
+    indiaPhoneNumber: INDIA_PHONE_NUMBER,
+    vapiPublicKey:    config.vapiPublicKey || VAPI_PUBLIC_KEY || null,
+    supabaseUrl:      config.supabaseUrl || SUPABASE_URL || null,
+    supabaseAnonKey:  process.env.SUPABASE_ANON_KEY || '',
+    webhookUrl:       config.webhookUrl || null,
+    tunnelUrl:        config.tunnelUrl || null
   });
+});
+
+app.get('/api/knowledge/search', (req, res) => {
+  const q = req.query.q || req.query.query;
+  if (!q) return res.status(400).json({ error: 'Query parameter q is required' });
+  const result = searchKnowledgeBase(q);
+  res.json(result);
 });
 
 // ── REST API Endpoints (Dual-layer Supabase + Local Store) ─────────────────────
@@ -456,24 +528,19 @@ app.post('/api/messages', async (req, res) => {
 
 // ── Sarah WhatsApp AI Auto-Responder ──────────────────────────────────────────
 async function generateSarahReply(userMessage, history = []) {
-  const systemPrompt = `You are Sarah, the friendly, highly competent AI receptionist and career counselor at Codevirus Security Pvt. Ltd. and Codevirus Academy located at Kapoorthala, Aliganj, Lucknow, UP, India (near IT crossing / Novel Plaza).
-Key information:
-- Leadership: Founded by Ankit Rai, Pawan Yadav, and Abhishek Pal.
-- Codevirus Academy: Offers certified, 100% hands-on practical training in:
-  * Certified SOC Analyst (SIEM, Splunk, Wazuh, Log Analysis, Incident Response, EDR)
-  * Certified Ethical Hacker & Bug Bounty Hunter (Burp Suite, OWASP Top 10, Web & API pentesting)
-  * Enterprise VAPT & Red Teaming (Network pentesting, Active Directory, Privilege Escalation)
-  * Cloud Security (AWS/Azure) & ISO 27001 readiness
-  * Offers offline classroom in Kapoorthala Lucknow + live online batches, demo sessions, and placement assistance.
-- Enterprise Services: Web & Mobile VAPT audits, Network penetration testing, Cloud security audits, Managed SOC.
-- Contact Number: +91 96487 77706 or +91 96671 72535.
-- Office hours: Monday to Saturday 10:00 AM to 7:00 PM IST.
+  const kbMatch = searchKnowledgeBase(userMessage);
+  const kbContext = kbMatch.status === 'found' ? `\nVERIFIED KNOWLEDGE BASE CONTEXT (${kbMatch.source}):\n${kbMatch.summary}\n` : '';
 
+  const systemPrompt = `You are Sarah, the AI coordinator and admissions counselor at Codevirus Security Pvt. Ltd. & Codevirus Academy located at Kapoorthala, Aliganj, Lucknow, UP, India.
+Leadership: Ankit Rai (Director/VAPT), Pawan Yadav (Bug Bounty), Abhishek Pal (SOC/SIEM).
+Campus Address: House No. A-76, Near Chandganj Garden Road, Kapoorthala, Aliganj, Lucknow (Ph: +91 96487-77706).
+Working hours: Mon-Sat 10 AM-8 PM, Sun 10 AM-4 PM IST.
+${kbContext}
 Guidelines:
-- Keep responses short, concise (1 to 3 short sentences maximum), warm, and natural.
-- Sound like a human WhatsApp counselor — not robotic, avoid walls of text.
-- Always offer to schedule a free counseling demo session at the Lucknow campus or over a phone call.
-- If they ask for fees, explain that fees depend on the track (classroom vs live online) and invite them for a free career demo session with our senior trainer Ankit Rai or Pawan Yadav.`;
+- If caller/user writes in Hindi or Hinglish, reply in natural, polite Hinglish. If in English, reply in friendly English.
+- Keep responses short and conversational (1 to 3 short sentences maximum).
+- Transparently acknowledge you are Sarah, the AI coordinator for Codevirus.
+- Never invent specific course fee numbers or unverified placement salaries. Invite them to a free 1-on-1 counseling demo at the Kapoorthala campus where counselors explain batch options and scholarships.`;
 
   if (OPENAI_API_KEY && !OPENAI_API_KEY.includes('your_openai_key')) {
     try {
@@ -764,6 +831,15 @@ app.post('/api/webhook/twilio-whatsapp', async (req, res) => {
 });
 
 app.post(['/webhook', '/api/vapi-webhook', '/api/webhook'], async (req, res) => {
+  // 1. Shared Secret Verification (Protects against fake booking injection)
+  if (VAPI_WEBHOOK_SECRET) {
+    const provided = req.headers['x-vapi-secret'] || req.headers['x-webhook-secret'] || req.query.secret;
+    if (provided !== VAPI_WEBHOOK_SECRET) {
+      console.warn('[webhook] ❌ Unauthorized webhook request — secret mismatch.');
+      return res.status(401).json({ error: 'Unauthorized: invalid webhook secret' });
+    }
+  }
+
   const body = req.body;
   console.log('[webhook]', JSON.stringify(body, null, 2));
 
@@ -794,6 +870,13 @@ app.post(['/webhook', '/api/vapi-webhook', '/api/webhook'], async (req, res) => 
     return res.status(200).json({ received: true });
   }
 
+  // 2. Idempotency Guard (Prevents duplicate bookings if Vapi retries)
+  if (toolCallId && processedToolCalls.has(toolCallId)) {
+    console.log(`[webhook] ⚡ Idempotency cache hit for toolCallId "${toolCallId}"`);
+    return res.json(processedToolCalls.get(toolCallId));
+  }
+
+  // 3. Handler: book_appointment
   if (fnName === 'book_appointment') {
     const { patient_name, phone, service, appointment_date, appointment_time, notes } = fnArgs;
 
@@ -810,12 +893,14 @@ app.post(['/webhook', '/api/vapi-webhook', '/api/webhook'], async (req, res) => 
     const conflict = await findSlotConflict(bookingDate, appointment_time);
     if (conflict.taken) {
       console.log(`[webhook] Slot taken → ${bookingDate} ${appointment_time}. Next free: ${conflict.nextAvailable.join(', ')}`);
-      return res.json({
+      const slotTakenResult = {
         results: [{
           toolCallId,
           result: JSON.stringify({ status: 'slot_taken', next_available: conflict.nextAvailable })
         }]
-      });
+      };
+      if (toolCallId) processedToolCalls.set(toolCallId, slotTakenResult);
+      return res.json(slotTakenResult);
     }
 
     const insertPayload = {
@@ -838,12 +923,91 @@ app.post(['/webhook', '/api/vapi-webhook', '/api/webhook'], async (req, res) => 
       console.warn('[webhook] Supabase remote sync skipped (local store active):', e.message);
     }
 
-    return res.json({
+    // Auto-dispatch WhatsApp Confirmation & Address Link
+    const cleanPhone = (phone || '').replace(/[^\d+]/g, '');
+    if (cleanPhone) {
+      const confirmText = `Greetings ${patient_name}! Your consultation at Codevirus Academy has been confirmed for ${bookingDate} at ${appointment_time || 'scheduled time'}.\n📍 Venue: House No. A-76, Kapoorthala, Aliganj, Lucknow (Near Chandganj Garden / IT Crossing).\n🗺️ Maps: https://maps.google.com/?q=Codevirus+Security+Lucknow\nCounselor Helpline: ${INDIA_PHONE_NUMBER}`;
+      store.addMessage({
+        chat_id: cleanPhone.startsWith('+') ? cleanPhone : `+${cleanPhone}`,
+        sender: 'business',
+        text: confirmText,
+        is_lead: false
+      });
+      store.addActivity({
+        type: 'whatsapp_confirmed',
+        title: 'WhatsApp Confirmation Sent',
+        detail: `${cleanPhone} — Booking confirmed for ${bookingDate} (${service})`,
+        tone: 'green'
+      });
+
+      if (process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID) {
+        fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: cleanPhone.replace('+', ''),
+            text: { body: confirmText }
+          })
+        }).catch(err => console.warn('[whatsapp-confirm] Meta Graph API dispatch notice:', err.message));
+      }
+    }
+
+    const bookingResult = {
       results: [{
         toolCallId,
-        result: `Confirmed for ${patient_name} — ${service} on ${bookingDate} at ${appointment_time} with Codevirus Security.`
+        result: `Confirmed for ${patient_name} — ${service} on ${bookingDate} at ${appointment_time} with Codevirus Security. A WhatsApp confirmation has been dispatched.`
       }]
+    };
+
+    if (toolCallId) {
+      processedToolCalls.set(toolCallId, bookingResult);
+    }
+
+    return res.json(bookingResult);
+  }
+
+  // 4. Handler: transfer_call (Human Handoff & Escalation)
+  if (fnName === 'transfer_call') {
+    const { caller_name, destination, reason } = fnArgs;
+    const destNumber = destination || INDIA_PHONE_NUMBER;
+    console.log(`[webhook] Call transfer triggered for ${caller_name || 'Caller'} → ${destNumber} (${reason || 'Human Request'})`);
+    store.addActivity({
+      type: 'call_transferred',
+      title: 'Call Transferred to Counselor',
+      detail: `${caller_name || 'Caller'} transferred to ${destNumber} — Reason: ${reason || 'Human Request'}`,
+      tone: 'blue'
     });
+    const transferResult = {
+      results: [{
+        toolCallId,
+        result: JSON.stringify({
+          status: 'transfer_initiated',
+          forward_to: destNumber,
+          message: 'Transferring caller to senior coordinator now.'
+        })
+      }]
+    };
+    if (toolCallId) processedToolCalls.set(toolCallId, transferResult);
+    return res.json(transferResult);
+  }
+
+  // 5. Handler: search_knowledge (Verified Knowledge Base Retrieval)
+  if (fnName === 'search_knowledge') {
+    const { query } = fnArgs;
+    console.log(`[webhook] Knowledge search query: "${query}"`);
+    const searchRes = searchKnowledgeBase(query);
+    const kbResult = {
+      results: [{
+        toolCallId,
+        result: JSON.stringify(searchRes)
+      }]
+    };
+    if (toolCallId) processedToolCalls.set(toolCallId, kbResult);
+    return res.json(kbResult);
   }
 
   res.json({ results: [{ toolCallId, result: 'Function not implemented on server.' }] });

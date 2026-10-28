@@ -1,0 +1,50 @@
+name: Codevirus Security CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Verify JavaScript Syntax
+        run: |
+          node -c server.js
+          node -c start.js
+          node -c tunnel.js
+          node -c setup.js
+          node -c reset-demo.js
+          node -c create_tables.js
+          node -c local-store.js
+          node -c generate-assets.js
+          node -c update-tunnel.js
+          node -c ecosystem.config.js
+          node -c windows-service.js
+          node -c test-suite.js
+          node -c scenario-test-suite.js
+
+      - name: Start Server in Background & Run Integration Tests
+        run: |
+          node server.js &
+          sleep 4
+          node test-suite.js
+
+      - name: Run Scenario & Knowledge Base Tests
+        run: |
+          node scenario-test-suite.js

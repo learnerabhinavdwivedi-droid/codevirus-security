@@ -9,6 +9,7 @@
     "setup": "node setup.js",
     "reset": "node reset-demo.js",
     "test": "node test-suite.js",
+    "test:scenarios": "node scenario-test-suite.js",
     "tunnel": "node update-tunnel.js",
     "tunnel:live": "node tunnel.js",
     "db:init": "node create_tables.js"

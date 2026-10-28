@@ -57,44 +57,47 @@ PORT=3000
 NODE_ENV=production
 
 # ── Vapi Voice API (vapi.ai) ──────────────────────────────────
-VAPI_PRIVATE_KEY=bb81d550-e93b-4034-8f97-501c200b3ce8
-VAPI_PUBLIC_KEY=d07e954e-ad86-49fa-87f5-b7f550e88471
-ASSISTANT_ID=399183dd-b23a-4558-a0d1-c3646fa3f8f9
-PHONE_NUMBER_ID=89cefd49-3647-4df2-90c2-f1419972c3a7
-TWILIO_NUMBER=+12602613818
+VAPI_PRIVATE_KEY=your_vapi_private_key_here
+VAPI_PUBLIC_KEY=your_vapi_public_key_here
+VAPI_WEBHOOK_SECRET=your_vapi_shared_webhook_secret
+ASSISTANT_ID=your_vapi_assistant_uuid
+PHONE_NUMBER_ID=your_vapi_phone_number_uuid
+INDIA_PHONE_NUMBER=+919648777706
+TWILIO_NUMBER=+919648777706
 
 # ── OpenAI API (platform.openai.com) ──────────────────────────
-OPENAI_API_KEY=sk-proj-T_DfWNd5...
+OPENAI_API_KEY=your_openai_api_key_here
 
 # ── Supabase Realtime Database (supabase.com) ─────────────────
-SUPABASE_URL=https://eqyuwufbzbgaxwxrapqv.supabase.co
-SUPABASE_SERVICE=eyJhbGciOi...
-SUPABASE_ANON_KEY=eyJhbGciOi...
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE=your_supabase_service_role_secret
+SUPABASE_ANON_KEY=your_supabase_anon_public_key
 
 # ── Real Meta WhatsApp Cloud API (Optional for direct Meta API) ─
-WHATSAPP_TOKEN=EAAB...
-WHATSAPP_PHONE_NUMBER_ID=10987654321
-WHATSAPP_VERIFY_TOKEN=codevirus_secret_token_2026
+WHATSAPP_TOKEN=your_meta_whatsapp_system_user_token
+WHATSAPP_PHONE_NUMBER_ID=your_meta_phone_number_id
+WHATSAPP_VERIFY_TOKEN=your_custom_webhook_verify_token
 
 # ── Real Twilio WhatsApp (Optional for direct Twilio numbers) ───
-TWILIO_ACCOUNT_SID=AC...
-TWILIO_AUTH_TOKEN=...
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 
 # ── Test & Counselor Mobile Number ────────────────────────────
-DEMO_PHONE_NUMBER=+919667172535
+DEMO_PHONE_NUMBER=+919648777706
+ADMIN_API_KEY=your_long_random_admin_api_key
 ```
 
 ---
 
-## 📱 Real Inbound Phone Integration
+## 📱 Indian Telephony & Inbound Phone Integration
 
 To connect real inbound calls to Sarah:
-1. Open [Vapi Dashboard](https://dashboard.vapi.ai) $\rightarrow$ **Phone Numbers**.
-2. Select your imported Twilio number (`+12602613818`) or Indian virtual number.
-3. Set **Inbound Assistant** $\rightarrow$ `Sarah - Codevirus Security` (`399183dd-b23a-4558-a0d1-c3646fa3f8f9`).
-4. Set Server URL $\rightarrow$ your tunnel URL (e.g. `https://tame-drinks-sit.loca.lt/webhook`).
-5. Whenever a client calls the number, Sarah answers, answers cybersecurity questions, checks diary availability, guards against double-booking, and confirms the consultation into your dashboard.
+1. Open [Vapi Dashboard](https://dashboard.vapi.ai) $\rightarrow$ **Phone Numbers** $\rightarrow$ **Import SIP / BYO Number**.
+2. Provision your Indian number with SIP trunking (e.g. Exotel, Knowlarity, or Ozonetel) and point the trunk to Vapi.
+3. Set **Inbound Assistant** $\rightarrow$ `Sarah - Codevirus Security`.
+4. Set Server URL $\rightarrow$ your production webhook URL (e.g. `https://voice.codevirussec.in/webhook`) with secret `VAPI_WEBHOOK_SECRET`.
+5. Whenever a client calls the number, Sarah answers within 2 rings, handles English/Hindi/Hinglish, checks diary availability, guards against double-booking, and confirms the consultation into your dashboard.
 
 ---
 
