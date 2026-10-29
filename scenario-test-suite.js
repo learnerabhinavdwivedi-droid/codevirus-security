@@ -35,13 +35,13 @@ async function runScenarioTests() {
     }
   }
 
+  let passed = 0;
+  let failed = 0;
+
   try {
   console.log('\n╔══════════════════════════════════════════════════════════════════════╗');
   console.log('║  Codevirus AI Voice Receptionist — Scenario Test Harness             ║');
   console.log('╚══════════════════════════════════════════════════════════════════════╝\n');
-
-  let passed = 0;
-  let failed = 0;
 
   function assert(condition, message) {
     if (condition) {
@@ -195,12 +195,12 @@ async function runScenarioTests() {
   console.log(`Results: ${passed} PASSED | ${failed} FAILED`);
   console.log('======================================================================\n');
 
-  if (failed > 0) process.exit(1);
   } finally {
     if (testServerInstance) {
       testServerInstance.close();
       console.log('[scenarios] In-process test server shut down cleanly.');
     }
+    process.exit(failed > 0 ? 1 : 0);
   }
 }
 

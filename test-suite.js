@@ -139,6 +139,16 @@ async function runTests() {
     const appts = await apptsRes.json();
     console.log(`✓ GET /api/appointments -> ${appts.length} appointments`);
 
+    // Self-healing cleanup of any leftover test slot from previous interrupted runs
+    for (const a of appts) {
+      if (
+        (a.candidate_name || a.patient_name) === 'Security Test Candidate' ||
+        (a.appointment_date === '2026-10-30' && a.appointment_time === '11:00 AM')
+      ) {
+        await fetch(`http://localhost:3000/api/appointments/${a.id}`, { method: 'DELETE' });
+      }
+    }
+
     // Appointments POST
     const newApptRes = await fetch('http://localhost:3000/api/appointments', {
       method: 'POST',
@@ -287,16 +297,17 @@ async function runTests() {
     }
 
     // iCalendar (.ics) download
+    const targetApptId = appts[0]?.id || 'appt-1';
     const icsRes = await fetch(
-      'http://localhost:3000/api/appointments/appt-1/calendar.ics'
+      `http://localhost:3000/api/appointments/${targetApptId}/calendar.ics`
     );
     const icsText = await icsRes.text();
     if (icsRes.status === 200 && icsText.includes('BEGIN:VCALENDAR')) {
       console.log(
-        `✓ GET /api/appointments/appt-1/calendar.ics -> 200 OK (RFC 5545 iCalendar validated)`
+        `✓ GET /api/appointments/${targetApptId}/calendar.ics -> 200 OK (RFC 5545 iCalendar validated)`
       );
     } else {
-      console.error('❌ GET /api/appointments/appt-1/calendar.ics failed');
+      console.error(`❌ GET /api/appointments/${targetApptId}/calendar.ics failed`);
       process.exit(1);
     }
 
@@ -398,6 +409,7 @@ async function runTests() {
       testServerInstance.close();
       console.log('[test] In-process test server shut down cleanly.');
     }
+    process.exit(0);
   }
 }
 
