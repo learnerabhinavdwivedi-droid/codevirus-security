@@ -54,15 +54,22 @@ flowchart TD
 
 | File / Directory | Category | Description |
 |---|---|---|
-| [`server.js`](file:///c:/voice%20code%20virus/server.js) | Backend Core | Express server, webhook verification, dual-layer DB synchronization, REST APIs, static asset serving |
+| [`server.js`](file:///c:/voice%20code%20virus/server.js) | Backend Entry | Clean root entry point delegating to modular application core in `src/` |
+| [`src/app.js`](file:///c:/voice%20code%20virus/src/app.js) | Application Core | Express orchestrator, security pipeline, route mounting, and error handling |
+| [`src/config/`](file:///c:/voice%20code%20virus/src/config) | Configuration | Validated environment configs, constants, operating hours, and prompts |
+| [`src/db/`](file:///c:/voice%20code%20virus/src/db) | Database Layer | Supabase PostgreSQL client and local JSON persistence store adapters |
+| [`src/middleware/`](file:///c:/voice%20code%20virus/src/middleware) | Middleware | Helmet CSP, CORS policies, rate limiters, staff auth, and error handling |
+| [`src/services/`](file:///c:/voice%20code%20virus/src/services) | Business Services | Appointment scheduling, knowledge base engine, messaging, and telephony |
+| [`src/routes/`](file:///c:/voice%20code%20virus/src/routes) | API Routing | Modular controllers for auth, appointments, exports, leads, and webhooks |
+| [`src/jobs/`](file:///c:/voice%20code%20virus/src/jobs) | Background Jobs | Hourly 48hr follow-up, lead extractor, and assistant date refresher |
 | [`start.js`](file:///c:/voice%20code%20virus/start.js) | Orchestration | Master unified launcher: auto-starts backend, tunnel, Vapi patch, and opens React browser |
 | [`start.bat`](file:///c:/voice%20code%20virus/start.bat) | Automation | 1-Click Windows execution script |
 | [`setup.js`](file:///c:/voice%20code%20virus/setup.js) | Provisioning | Creates/updates Vapi Sarah Assistant with system prompt, multilingual models, and tools |
 | [`local-store.js`](file:///c:/voice%20code%20virus/local-store.js) | Database | Thread-safe atomic JSON persistence store for offline or Supabase fallback |
 | [`create_tables.js`](file:///c:/voice%20code%20virus/create_tables.js) | Database | Supabase PostgreSQL schema provisioning and table migration script |
-| [`supabase_setup.sql`](file:///c:/voice%20code%20virus/supabase_setup.sql) | Database | SQL schema, indexes, and Row-Level Security (RLS) policies |
+| [`supabase_setup.sql`](file:///c:/voice%20code%20virus/supabase_setup.sql) | Database | Production PostgreSQL schema with triggers, indexes, RLS, and domain views |
 | [`reset-demo.js`](file:///c:/voice%20code%20virus/reset-demo.js) | Operations | Wipes test artifacts and reseeds clean demo consultations |
-| [`test-suite.js`](file:///c:/voice%20code%20virus/test-suite.js) | QA / CI | 5-phase test harness covering syntax, static serving, REST APIs, and security |
+| [`test-suite.js`](file:///c:/voice%20code%20virus/test-suite.js) | QA / CI | 5-phase test harness covering syntax across all modules, REST APIs, and security |
 | [`scenario-test-suite.js`](file:///c:/voice%20code%20virus/scenario-test-suite.js) | QA / CI | 11 real-world behavioral scenario tests (Hindi/Hinglish, idempotency, escalation) |
 | [`ecosystem.config.js`](file:///c:/voice%20code%20virus/ecosystem.config.js) | Production | PM2 process configuration for 24/7 background uptime |
 | [`nginx.conf`](file:///c:/voice%20code%20virus/nginx.conf) | Production | Production reverse proxy configuration with TLS and rate limiting |

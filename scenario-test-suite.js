@@ -9,10 +9,33 @@
  */
 
 const fetch = require('node-fetch');
+const { startServer } = require('./server');
 
 const BASE_URL = 'http://localhost:3000';
 
+async function checkServerRunning() {
+  try {
+    const res = await fetch(`${BASE_URL}/health`, { timeout: 1000 });
+    const data = await res.json();
+    return data && data.company === 'Codevirus Security';
+  } catch {
+    return false;
+  }
+}
+
 async function runScenarioTests() {
+  let testServerInstance = null;
+  const isRunning = await checkServerRunning();
+  if (!isRunning) {
+    console.log('[scenarios] Spawning in-process test server on port 3000…');
+    testServerInstance = startServer();
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      if (await checkServerRunning()) break;
+    }
+  }
+
+  try {
   console.log('\n╔══════════════════════════════════════════════════════════════════════╗');
   console.log('║  Codevirus AI Voice Receptionist — Scenario Test Harness             ║');
   console.log('╚══════════════════════════════════════════════════════════════════════╝\n');
@@ -173,6 +196,12 @@ async function runScenarioTests() {
   console.log('======================================================================\n');
 
   if (failed > 0) process.exit(1);
+  } finally {
+    if (testServerInstance) {
+      testServerInstance.close();
+      console.log('[scenarios] In-process test server shut down cleanly.');
+    }
+  }
 }
 
 runScenarioTests().catch(err => {
